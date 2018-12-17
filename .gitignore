@@ -1,0 +1,13 @@
+.idea/
+.vagrant/
+src/*/local/
+src/*/metadata/local.meta
+src/*/bin/*.pyc
+src/pyden/bin/lib/dist/*/
+!src/pyden/bin/lib/dist/README
+src/pyden/bin/lib/venv/*/
+!src/pyden/bin/lib/venv/README
+src/pyden-manager/bin/build/*
+!src/pyden-manager/bin/build/README
+python-logo.xcf
+*.pyc
