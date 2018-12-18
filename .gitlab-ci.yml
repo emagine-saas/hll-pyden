@@ -1,0 +1,36 @@
+image: python:2.7
+
+stages:
+    - splunktest
+
+splunktest:
+  stage: splunktest
+  script:
+    # first two lines are needed because when gitlab clones the repo it does so with a different set of permissions
+    - find src -type d -exec chmod 0755 {} +
+    - find src -type f -exec chmod 0644 {} +
+    - tar -czvf pyden.tgz -C src pyden
+    - tar -czvf pyden-manager.tgz -C src pyden-manager
+    - "token=$(curl -X GET -u $SPLUNK_CREDS --url \"https://api.splunk.com/2.0/rest/login/splunk\" | python -c 'import sys, json; print(json.load(sys.stdin)[\"data\"][\"token\"])' \"$i\")"
+    - echo $token
+    - "pyden_id=$(curl -X POST -H \"Authorization: bearer $token\" -H \"Cache-Control: no-cache\" -F \"app_package=@\"pyden.tgz\"\" --url \"https://appinspect.splunk.com/v1/app/validate\" | python -c 'import sys, json; print(json.load(sys.stdin)[\"request_id\"])' \"$i\")"
+    - "manager_id=$(curl -X POST -H \"Authorization: bearer $token\" -H \"Cache-Control: no-cache\" -F \"app_package=@\"pyden-manager.tgz\"\" --url \"https://appinspect.splunk.com/v1/app/validate\" | python -c 'import sys, json; print(json.load(sys.stdin)[\"request_id\"])' \"$i\")"
+    - sleep 60
+    - "curl -X GET -H \"Authorization: bearer $token\" -H \"Cache-Control: no-cache\" -H \"Content-Type: text/html\" --url \"https://appinspect.splunk.com/v1/app/report/$pyden_id\" > pyden.html"
+    - "curl -X GET -H \"Authorization: bearer $token\" -H \"Cache-Control: no-cache\" -H \"Content-Type: text/html\" --url \"https://appinspect.splunk.com/v1/app/report/$manager_id\" > manager.html"
+    - "pyden_failures=$(curl -X GET -H \"Authorization: bearer $token\" -H \"Cache-Control: no-cache\" -H \"Content-Type: application/json\" --url \"https://appinspect.splunk.com/v1/app/report/$pyden_id\" | python -c 'import sys, json; print(json.load(sys.stdin)[\"summary\"][\"failure\"])' \"$i\")"
+    - "manager_failures=$(curl -X GET -H \"Authorization: bearer $token\" -H \"Cache-Control: no-cache\" -H \"Content-Type: application/json\" --url \"https://appinspect.splunk.com/v1/app/report/$manager_id\" | python -c 'import sys, json; print(json.load(sys.stdin)[\"summary\"][\"failure\"])' \"$i\")"
+    - if [[ $pyden_failures -gt 0 ]]; then echo "There were one or more failures for Pyden app"; fi
+    - if [[ $manager_failures -gt 0 ]]; then echo "There were one or more failures for Pyden Manager app"; fi
+    - x=$(( $pyden_failures + $manager_failures ))
+    - if [[ $x -gt 0 ]]; then echo "There were $x failures in apps."; exit 1; fi
+  artifacts:
+    when: always
+    paths:
+      - pyden.html
+      - manager.html
+      - pyden.tgz
+      - pyden-manager.tgz
+  tags:
+    - docker
+
