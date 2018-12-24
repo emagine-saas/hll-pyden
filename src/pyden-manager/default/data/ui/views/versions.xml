@@ -4,7 +4,11 @@
     <panel>
       <table id="version_table">
         <search>
-          <query>| getversions | lookup versionstatus version | rex field=version "(?&lt;v_M&gt;\d+)\.(?&lt;v_m&gt;\d+)\.(?&lt;v_mm&gt;\d+)" | eval v_M=tonumber(v_M), v_m=tonumber(v_m), v_mm=tonumber(v_mm) | sort -v_M, -v_m, -v_mm | table status version</query>
+          <query>
+            <![CDATA[
+            | getversions | lookup versionstatus version | rex field=version "(?<v_M>\d+)\.(?<v_m>\d+)\.(?<v_mm>\d+)" | eval v_M=tonumber(v_M), v_m=tonumber(v_m), v_mm=tonumber(v_mm) | sort -v_M, -v_m, -v_mm | table status version
+            ]]>
+          </query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
         </search>

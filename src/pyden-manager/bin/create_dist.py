@@ -1,6 +1,7 @@
 import sys
 import os
 import tarfile
+import json
 from subprocess import call
 from splunk.rest import simpleRequest
 from splunk import Intersplunk
@@ -42,9 +43,6 @@ def download_python(version, session_key, build_path):
 
 
 def build_dist(version, download):
-    settings = dict()
-    Intersplunk.readResults(settings=settings)
-    session_key = settings['sessionKey']
     pyden_location, config = load_pyden_config()
     if version in config.sections():
         Intersplunk.generateErrorResults("Version already exists.")
@@ -116,13 +114,29 @@ def build_dist(version, download):
     logger.info("Finished building Python %s. Distribution available at %s." % (version, pyden_prefix))
 
     write_pyden_config(pyden_location, version, py_exec)
+    if not config.has_section("default") or not config.has_option("default", "distribution"):
+        write_pyden_config(pyden_location, 'default', version, attribute='distribution')
     return
 
 
 if __name__ == "__main__":
     logger = setup_logging()
     download_arg = True
-    dist_version = "3.7.1"  # latest version as of authoring
+    settings = dict()
+    Intersplunk.readResults(settings=settings)
+    session_key = settings['sessionKey']
+    latest_python_search = r"""
+    | getversions 
+    | lookup versionstatus version 
+    | rex field=version "(?<v_M>\d+)\.(?<v_m>\d+)\.(?<v_mm>\d+)" 
+    | eval v_M=tonumber(v_M), v_m=tonumber(v_m), v_mm=tonumber(v_mm) 
+    | sort -v_M, -v_m, -v_mm 
+    | table version 
+    | head 1
+    """
+    r = simpleRequest("/servicesNS/nobody/pyden-manager/search/jobs",
+                      postargs={'search': latest_python_search, 'exec_mode': 'oneshot'}, sessionKey=session_key)
+    dist_version = json.loads(r[1])['results'][0]['version']
     for arg in sys.argv:
         if "version" in arg:
             dist_version = arg.split("=")[1]

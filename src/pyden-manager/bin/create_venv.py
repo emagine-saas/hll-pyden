@@ -14,16 +14,16 @@ if __name__ == "__main__":
         except ValueError:
             Intersplunk.generateErrorResults("Incorrect argument provided")
             sys.exit(1)
-    settings = dict()
-    Intersplunk.readResults(settings=settings)
-    session_key = settings['sessionKey']
-    if 'version' not in args or 'name' not in args:
-        Intersplunk.generateErrorResults("Must supplied both a version and a name for the new environment.")
+    pyden_location, config = load_pyden_config()
+    if 'name' not in args:
+        Intersplunk.generateErrorResults("No name for the new environment was provided.")
         sys.exit(1)
     # get executable
-    version = args['version']
+    version = args.get('version')
+    if not version:
+        if config.has_option("default", "distribution"):
+            version = config.get("default", "distribution")
     name = args['name']
-    pyden_location, config = load_pyden_config()
     if version in config.sections():
         py_exec = config.get(version, 'executable')
     else:
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     if not py_exec:
         Intersplunk.generateErrorResults("Python version not found in pyden.conf.")
         sys.exit(1)
-    if "default" not in config.sections():
+    if not config.has_section("default") or not config.has_option("default", "environment"):
         write_pyden_config(pyden_location, 'default', name, attribute='environment')
 
     if version < '3':
