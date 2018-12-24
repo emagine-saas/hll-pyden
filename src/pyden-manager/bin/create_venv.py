@@ -23,7 +23,7 @@ if __name__ == "__main__":
     # get executable
     version = args['version']
     name = args['name']
-    pyden_location, config = load_pyden_config(session_key)
+    pyden_location, config = load_pyden_config()
     if version in config.sections():
         py_exec = config.get(version, 'executable')
     else:

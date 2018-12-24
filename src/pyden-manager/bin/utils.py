@@ -1,15 +1,20 @@
-from splunk.rest import simpleRequest
 import os
-from ConfigParser import ConfigParser
+import sys
+if sys.version < '3':
+    from ConfigParser import ConfigParser
+else:
+    from configparser import ConfigParser
 
 
-def load_pyden_config(session_key):
-    pyden_location = simpleRequest("/servicesNS/nobody/pyden-manager/properties/pyden/app/location",
-                                   sessionKey=session_key)[1]
-    default_conf = os.path.abspath(os.path.join(pyden_location, 'default', 'pyden.conf'))
+def load_pyden_config():
+    pm_config = ConfigParser()
+    pm_default = os.path.abspath(os.path.join(os.pardir, 'default', 'pyden.conf'))
+    pm_local = os.path.abspath(os.path.join(os.pardir, 'local', 'pyden.conf'))
+    pm_config.read([pm_default, pm_local])
+    pyden_location = pm_config.get('app', 'location')
     local_conf = os.path.abspath(os.path.join(pyden_location, 'local', 'pyden.conf'))
     config = ConfigParser()
-    config.read([default_conf, local_conf])
+    config.read([local_conf])
     return pyden_location, config
 
 

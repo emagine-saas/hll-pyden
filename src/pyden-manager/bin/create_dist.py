@@ -45,7 +45,7 @@ def build_dist(version, download):
     settings = dict()
     Intersplunk.readResults(settings=settings)
     session_key = settings['sessionKey']
-    pyden_location, config = load_pyden_config(session_key)
+    pyden_location, config = load_pyden_config()
     if version in config.sections():
         Intersplunk.generateErrorResults("Version already exists.")
         sys.exit(1)

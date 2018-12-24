@@ -1,0 +1,17 @@
+<dashboard script="version_icons.js" stylesheet="version_decorations.css">
+  <label>Versions</label>
+  <row>
+    <panel>
+      <table id="version_table">
+        <search>
+          <query>| getversions | lookup versionstatus version | rex field=version "(?&lt;v_M&gt;\d+)\.(?&lt;v_m&gt;\d+)\.(?&lt;v_mm&gt;\d+)" | eval v_M=tonumber(v_M), v_m=tonumber(v_m), v_mm=tonumber(v_mm) | sort -v_M, -v_m, -v_mm | table status version</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="count">100</option>
+        <option name="drilldown">none</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</dashboard>
