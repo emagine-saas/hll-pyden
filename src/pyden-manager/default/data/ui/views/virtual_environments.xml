@@ -1,16 +1,33 @@
-<dashboard script="venvs_icons.js" stylesheet="venvs_decorations.css">
+<form script="venvs_icons.js" stylesheet="venvs_decorations.css">
   <label>Virtual Environments</label>
+  <fieldset submitButton="false" autoRun="false">
+    <input type="text" token="env_name" searchWhenChanged="true">
+      <label>New Environment</label>
+      <default>Create new environment</default>
+    </input>
+    <input type="dropdown" token="env_version">
+      <label>Version</label>
+      <fieldForLabel>version</fieldForLabel>
+      <fieldForValue>version</fieldForValue>
+      <search>
+        <query>| getversions | lookup versionstatus version | rex field=version "(?&lt;v_M&gt;\d+)\.(?&lt;v_m&gt;\d+)\.(?&lt;v_mm&gt;\d+)" | eval v_M=tonumber(v_M), v_m=tonumber(v_m), v_mm=tonumber(v_mm) | sort -v_M, -v_m, -v_mm | table status version | where status=1</query>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
+  </fieldset>
   <row>
     <panel>
+      <title>Virtual Environments</title>
       <table id="venvs_table">
         <search id="venvs_search">
-          <query>| getvenvs | eval delete=1 | table delete environment</query>
+          <query>| getvenvs | eval action=1 | table action environment | append [| makeresults count=1 | eval action=0 | eval environment="$env_name$" | table action environment]</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
         </search>
+        <option name="count">100</option>
         <option name="drilldown">none</option>
-        <option name="refresh.display">progressbar</option>
       </table>
     </panel>
   </row>
-</dashboard>
+</form>
