@@ -1,0 +1,16 @@
+<dashboard script="venvs_icons.js" stylesheet="venvs_decorations.css">
+  <label>Virtual Environments</label>
+  <row>
+    <panel>
+      <table id="venvs_table">
+        <search id="venvs_search">
+          <query>| getvenvs | eval delete=1 | table delete environment</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+</dashboard>
