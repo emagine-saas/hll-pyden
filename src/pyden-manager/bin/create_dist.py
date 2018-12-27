@@ -132,10 +132,11 @@ if __name__ == "__main__":
     | eval v_M=tonumber(v_M), v_m=tonumber(v_m), v_mm=tonumber(v_mm) 
     | sort -v_M, -v_m, -v_mm 
     | table version 
-    | head 1
+    | head 1 
     """
     r = simpleRequest("/servicesNS/nobody/pyden-manager/search/jobs",
-                      postargs={'search': latest_python_search, 'exec_mode': 'oneshot'}, sessionKey=session_key)
+                      postargs={'search': latest_python_search, 'exec_mode': 'oneshot', 'output_mode': 'json'},
+                      sessionKey=session_key)
     dist_version = json.loads(r[1])['results'][0]['version']
     for arg in sys.argv:
         if "version" in arg:

@@ -32,7 +32,7 @@ require([
                 range = RANGE[cell.value];
             }
             // Create the icon element and add it to the table cell
-            $td.addClass('icon').html(_.template('<i class="icon-<%-icon%> <%- range %>"></i>', {
+            $td.addClass('icon').html(_.template('<i class="icon-<%-icon%> <%- range %> click"></i>', {
                 icon: icon,
                 range: range
             }));
@@ -40,7 +40,6 @@ require([
                 var i = $(this.firstChild);
                 i.removeClass("icon-" + icon);
                 i.removeClass(range);
-                i.addClass(icon);
                 i.addClass('icon-rotate');
                 i.addClass('blue');
                 i.addClass('spin');
@@ -62,6 +61,7 @@ require([
                     range = RANGE[newValue];
                     i.addClass('icon-' + icon);
                     i.addClass(range);
+                    i.addClass('click');
                 })
             });
         }

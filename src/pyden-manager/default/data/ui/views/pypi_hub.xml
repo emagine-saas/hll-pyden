@@ -1,0 +1,42 @@
+<form script="pypi.js" stylesheet="decorations.css">
+  <label>PyPI Hub</label>
+  <fieldset autoRun="false" submitButton="false">
+    <input type="text" token="filter" searchWhenChanged="true">
+      <label>Filter</label>
+      <default>*</default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>PyPI Packages</title>
+      <table id="package_table">
+        <search>
+          <query>| getpackages pypi_simple_index | search package=$filter$</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="count">50</option>
+        <option name="drilldown">cell</option>
+        <drilldown>
+          <set token="package">$click.value2$</set>
+        </drilldown>
+      </table>
+    </panel>
+    <panel>
+      <title>PyPI Description</title>
+      <input id="venv" type="dropdown" token="environment">
+        <label>Environment</label>
+        <fieldForLabel>environment</fieldForLabel>
+        <fieldForValue>environment</fieldForValue>
+        <search>
+          <query>| getvenvs</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+      </input>
+      <html id="description">
+        <body/>
+      </html>
+    </panel>
+  </row>
+</form>

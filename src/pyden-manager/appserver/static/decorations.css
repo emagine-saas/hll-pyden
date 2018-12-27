@@ -1,29 +1,31 @@
 /* Custom Icons */
-td.icon {
+.icon {
     text-align: center;
     width: 10%;
 }
-td.icon i {
+.icon i {
     font-size: 25px;
     text-shadow: 1px 1px #aaa;
     box-shadow: 0 4px rgba(0, 0, 0, 0.0);
     display: inline-block;
+}
+.icon .click i {
     cursor: pointer;
 }
-td.icon i:active{
+.icon .click i:active{
     box-shadow: 0 0 rgba(0, 0, 0, 0.0);
     transform: translateY(4px);
 }
-td.icon .red {
+.icon .red {
     color: red;
 }
-td.icon .green {
+.icon .green {
     color: #006400;
 }
-td.icon .blue {
+.icon .blue {
     color: #00B0E4;
 }
-td.icon .spin {
+.icon .spin {
     animation: spin 2s infinite linear;
 }
 @keyframes spin {

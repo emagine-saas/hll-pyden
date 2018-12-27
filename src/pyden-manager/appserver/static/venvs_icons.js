@@ -1,10 +1,9 @@
 require([
-    'underscore',
     'jquery',
     'splunkjs/mvc',
     'splunkjs/mvc/tableview',
     'splunkjs/mvc/simplexml/ready!'
-], function(_, $, mvc, TableView) {
+], function($, mvc, TableView) {
     var venvs_search = mvc.Components.get('venvs_search');
     var RangeMapIconRenderer = TableView.BaseCellRenderer.extend({
         canRender: function(cell) {
@@ -15,15 +14,14 @@ require([
             // Create the icon element and add it to the table cell
             var verb;
             if (cell.value === "1") {
-                $td.addClass('icon').html('<i class="icon-minus-circle red"></i>');
+                $td.addClass('icon').html('<i class="icon-minus-circle red click"></i>');
                 verb = "delete";
             } else {
-                $td.addClass('icon').html('<i class="icon-plus-circle green"></i>');
+                $td.addClass('icon').html('<i class="icon-plus-circle green click"></i>');
                 verb = "create";
             }
 
             $td.on("click", function(){
-                console.log('kick off');
                 var search;
                 var i = $(this.firstChild);
                 i.addClass('icon-rotate');

@@ -1,4 +1,4 @@
-<dashboard script="version_icons.js" stylesheet="version_decorations.css">
+<dashboard script="version_icons.js" stylesheet="decorations.css">
   <label>Versions</label>
   <row>
     <panel>

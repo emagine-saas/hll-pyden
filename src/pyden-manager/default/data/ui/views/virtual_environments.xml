@@ -1,4 +1,4 @@
-<form script="venvs_icons.js" stylesheet="venvs_decorations.css">
+<form script="venvs_icons.js" stylesheet="decorations.css">
   <label>Virtual Environments</label>
   <fieldset submitButton="false" autoRun="false">
     <input type="text" token="env_name" searchWhenChanged="true">

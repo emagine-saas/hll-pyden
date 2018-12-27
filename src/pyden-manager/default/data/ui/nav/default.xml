@@ -1,5 +1,6 @@
 <nav search_view="search">
   <view name="versions" />
   <view name="virtual_environments" />
+  <view name="pypi_hub" />
   <view name="search" default='true' />
 </nav>
