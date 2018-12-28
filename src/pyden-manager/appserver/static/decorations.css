@@ -1,6 +1,6 @@
 /* Custom Icons */
 .icon {
-    text-align: center;
+    text-align: center !important;
     width: 10%;
 }
 .icon i {

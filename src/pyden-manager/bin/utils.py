@@ -18,15 +18,13 @@ def load_pyden_config():
     return pyden_location, config
 
 
-def write_pyden_config(pyden_location, stanza, value, attribute="executable"):
+def write_pyden_config(pyden_location, config, stanza, value, attribute="executable"):
     local_conf = os.path.join(pyden_location, 'local', 'pyden.conf')
     local_dir = os.path.dirname(local_conf)
     if not os.path.isdir(local_dir):
         os.mkdir(local_dir)
-    write_mode = 'a+' if os.path.isfile(local_conf) else 'w+'
-    with open(local_conf, write_mode) as f:
-        content = f.read()
-        if len(content) > 0:
-            f.write("\n")
-        content = """[%s]\n%s = %s\n""" % (stanza, attribute, value)
-        f.write(content)
+    if not config.has_section(stanza):
+        config.add_section(stanza)
+    config.set(stanza, attribute, value)
+    with open(local_conf, 'wb') as f:
+        config.write(f)
