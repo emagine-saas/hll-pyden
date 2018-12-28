@@ -1,8 +1,9 @@
 <dashboard script="version_icons.js" stylesheet="decorations.css">
-  <label>Versions</label>
+  <label>Python Versions</label>
   <row>
     <panel>
       <table id="version_table">
+        <title>Click the green button to download and compile. Click the red button to remove from PyDen.</title>
         <search>
           <query>
             <![CDATA[

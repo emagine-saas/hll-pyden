@@ -10,6 +10,7 @@
     <panel>
       <title>PyPI Packages</title>
       <table id="package_table">
+        <title>Click a package to see its description</title>
         <search>
           <query>| getpackages pypi_simple_index | search package=$filter$</query>
           <earliest>-24h@h</earliest>

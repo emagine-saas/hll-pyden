@@ -20,13 +20,36 @@
     <panel>
       <title>Virtual Environments</title>
       <table id="venvs_table">
+        <title>Click a virtual environment to see its packages</title>
         <search id="venvs_search">
           <query>| getvenvs | eval action=1 | table action environment | append [| makeresults count=1 | eval action=0 | eval environment="$env_name$" | table action environment]</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
         </search>
         <option name="count">100</option>
-        <option name="drilldown">none</option>
+        <option name="drilldown">cell</option>
+        <drilldown>
+          <set token="env_clicked">$click.value2$</set>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+  <row depends="$env_clicked$">
+    <panel>
+      <title>Installed Packages</title>
+      <table>
+        <title>Click a package to be taken to its PyPI description</title>
+        <search>
+          <query>| pip environment=$env_clicked$ freeze | eval pv=split(messages, "==") | eval package=mvindex(pv, 0), version=mvindex(pv, 1) | table package version</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="count">10</option>
+        <option name="drilldown">cell</option>
+        <option name="refresh.display">progressbar</option>
+        <drilldown>
+          <link target="_blank">/app/pyden-manager/pypi_hub?form.filter=$click.value$&amp;form.environment=$env_clicked$</link>
+        </drilldown>
       </table>
     </panel>
   </row>
