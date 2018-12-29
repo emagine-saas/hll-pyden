@@ -29,6 +29,8 @@ There are three primary custom commands that make up the core functionality of P
 ## Createdist
 The `createdist` command is how PyDen downloads and builds a CPython distribution. This command contains two keyword arguments `version` and `download`. The `version` argument is simply the version number of the Python installation to be built. The `download` argument is optional and only used if not doing an automatic download from [www.python.org](https://www.python.org). Instead of being downloaded, the Python source package can be placed inside the PyDen Manager's bin/build directory. When done this way, the `download` argument should provide the name of the package to be used. Package must be a file of `.tgz` format.
 
+*Note: the first distribution created by this command will be set as the default version used by other commands like `createvenv`.*
+
 Examples:
 
 *Download and install version 3.7.2 from www.python.org*
@@ -38,8 +40,106 @@ Examples:
 
 *Install 3.7.2 version of Python from source package called mypython.tgz*
 ```
-| createdict version=3.7.2 download=mypython.tgz
+| createdist version=3.7.2 download=mypython.tgz
 ```
 
 ## Createvenv
-The `createvenv` command creates a Python virtual environment. 
+The `createvenv` command creates a Python virtual environment with a specified version and name. The command has two required keyword arguments: version and name. The version is a version number that references an installed Python distribution from the `createdist` command. The name argument is a name to be associated with the environment for future reference.
+
+*Note: the first environment created by this command will be set as the default environment used by other commands like `pip`.*
+
+Examples:
+
+*Create a virtual environment with Python version 3.7.2 and named mypy*
+```
+| createvenv version=3.7.2 name=mypy
+```
+
+## Pip
+The `pip` command installs Python packages available from the Python Package Index. This command works identically to the command-line tool of the same name with one exception. The command takes a single keyword argument called environment which specifies which virtual environment the command applies to. If used, this must be the first argument listed. If not used, the command will apply to the default virtual environment.
+
+Examples:
+
+*Install the package `requests` to the default environment*
+```
+| pip install requests
+```
+
+*Upgrade the pip version of the environment `myvenv`*
+```
+| pip environment=myvenv install --upgrade pip
+```
+
+## Additional Commands
+The following commands are included in the PyDen Manager app but are of limited value. They're typically used to provide some needed functionality for a dashboard. 
+
+### Getversions
+This command creates a list of events with a field called `version` whose values are PyDen compatible versions of Python available from [www.python.org](https://www.python.org).
+
+Example:
+
+```
+| getversions
+```
+
+### Pydelete
+This command deletes distributions and virtual environments created through the `createdist` and `createvenv` commands. The command takes a single positional argument of the name or version number of the environment or distribution to be deleted.
+
+Examples:
+
+*Delete the `3.7.2` distribution*
+```
+| pydelete 3.7.2
+```
+
+*Delete the virtual environment named `mypy`*
+```
+| pydelete mypy
+```
+
+### Getvenvs
+This command creates a set of events with a single field called `environment` whose values are the names of virtual environments created by the `createvenv` command.
+
+Example:
+
+```
+| getvenvs
+```
+
+### Getpackages
+The `getpackages` command is used to get package information from the Python Package Index. There are two modes to this command. The command itself takes a single positional argument. If `pypi_simple_index` is provided as the argument then the command will create a set of events with a single field called `package` whose value is the name of a package from PyPI's [simple index](https://PyPI.org/simple/).
+
+If any other argument is provided, the command will use its other mode which looks up the json data for a PyPI package found at `https://pypi.python.org/pypi/package_name/json` and returns an event with a single field called `description` whose value is the PyPI description of the package provided.
+
+Examples:
+
+*Get all PyPI packages from the PyPI simple index*
+```
+| getpackages pypi_simple_index
+```
+
+*Get the description for the requests package*
+```
+| getpackages requests
+```
+
+# Using virtual environments
+Leveraging the environments in the PyDen app is simply a matter of importing the activation modules provided with PyDen.
+
+PyDen comes with two scripts in its bin directory: `activate.py` and  `activate_default.py`. The `activate.py` script contains a function called `activate_venv_or_die`. In order to run a script with a PyDen virtual environment, the script must include the following code at the top, substituting your virtual environment name for `environment_name`:
+```python
+from activate import activate_venv_or_die
+activate_venv_or_die("environment_name")
+```
+
+This will utilize Python's `os.execve` function to restart the script with the provided virtual environment. 
+
+While this will work with any valid virtual environment provided, you may not wish to muddy up your import statements with functions. In order to avoid this problem the `activate_default.py` script is provided. This script will activate the default virtual environment defined in the PyDen app's `pyden.conf` configuration file when imported and without the function call. Instead of the above code, simply add the following code to the top of your script:
+```python
+import activate_default
+```
+
+It is important to note that these two scripts are included in the PyDen app and in order to import them as Python modules, you will need to do one of the following:
+- Place the script you are writing in the PyDen bin directory (this is highly discouraged as scripts can be overwritten during an upgrade of the app)
+- Modify the `sys.path` to include the PyDen bin directory (this must occur before import)
+- Copy `activate.py` and `activate_default.py` files into the app which contains your script (preferred method)
