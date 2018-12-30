@@ -1,0 +1,6 @@
+# Create a virtual environment
+## Dashboard creation
+This simplest way to create a virtual environment for use with PyDen is to use the `Virtual Environments` dashboard in the PyDen Manager app. After navigating to the dashboard the user will be presented with two inputs and a Splunk table. The inputs are for entering the name and selecting the version of the environment the user wants to create. The table will show a list of existing virtual environments followed by an entry that says `Create new environment` with a green ![icon-plus-circle](../media/icon-plus-circle.png) icon to its left. In order to create a new environment, type in the desired name for the environment into the text input and select the desired version and then click the green icon.
+
+## Createvenv command
+The `Virtual Environment` dashboard should work in any use case as long as the version selected is properly built. However there may be an unexpected need to view the output of the `createvenv` command. The command can be run manually from a search bar by following the details from the [Custom Commands](../README.md#custom-commands) section of the README.
