@@ -1,6 +1,21 @@
 # Overview 
 The goal of this application is to provide full Python functionality to Splunk. Currently, the Python distribution built in to Splunk runs on a version 2.7.x depending on the Splunk version. Additionally, there are significant core modules that are excluded in this distribution. This suite of apps will allow developers to create Python virtual environments and pick the Python version and modules installed to the environment. This includes core distributions of the interpreter in multiple 2.7.x and 3.5+ versions, as well as the use of pip for the installation of additional modules within a virtual environment.
 
+# Why PyDen
+## Introduction
+The PyDen app is based on the premise that the Splunk built-in CPython distribution is insufficient for advanced development within the Splunk platform. The key example of this is Splunk's own Machine Learning toolkit (MLTK). The Splunk MLTK requires the installation of an add-on which provides access to the Anaconda Python interpreter and several Python libraries that are common in the community for Machine Learning applications, such as `numpy`. 
+
+While this is an excellent solution for providing the needed functionality for the MLTK, it's insufficient for generalized use for three reasons. These are the three primary concerns  that PyDen attempts to address: version flexibility, proper isolation, and access to PyPI packages.
+
+## Version flexibility
+Splunk's built-in Python utilizes version 2.7 of CPython. While there are a decent number of common libraries that are continuing support of 2.7, the number is dwindling and  newer projects do not support it at all. The version will also reach end of life in 2020, causing significant supportability and security issues. The PyDen app allows a developer to build CPython from source in a variety of versions including 3.5 and higher through the use of the `createdist` command.
+
+## Development isolation
+Modules added to a Splunk app are available to the entire installation, which is in contrast to Python development best practices which calls for the isolation of package requirements through the use of virtual environments. This isolation of packages resolves issues around dependency conflicts and keeps the scope of libraries to the context of the application. This is done through making Python virtual environments available via PyDen's `createvenv` command.
+
+## Leveraging libraries
+Splunk does not allow a developer to add additional packages not included with the built-in distribution except through inclusion within the app directly. Ease of inclusion of third-party libraries is a key benefit of Python. However, including non-native libraries within a Splunk application poses two key challenges: dependency chasing and library conflicts (which we discuss in the next section). In order to include a non-native library within a Splunk app, a developer must include it directly within the app's `bin` directory. If the package contains any dependencies, those must be added as well. If any of the dependencies have their own dependencies, they must be included as well. And so on, and so on. By creating access to the `pip` command within Splunk, PyDen does not suffer this problem.
+
 # Architecture
 PyDen is broken into two separate Splunk apps called: PyDen and PyDen Manager. The PyDen Manager app contains all the functionality needed for a user to download, compile, and build Python distributions and virtual environments, as well as the ability to use pip to install packages to those environments. The actual CPython builds and environments are placed in the PyDen app. The location of the PyDen app can vary depending on the Splunk architecture. 
 
