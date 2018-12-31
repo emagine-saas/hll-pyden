@@ -156,5 +156,5 @@ import activate_default
 
 It is important to note that these two scripts are included in the PyDen app and in order to import them as Python modules, you will need to do one of the following:
 - Place the script you are writing in the PyDen bin directory (this is highly discouraged as scripts can be overwritten during an upgrade of the app)
-- Modify the `sys.path` to include the PyDen bin directory (this must occur before import)
+- Modify the `sys.path` to include the PyDen bin directory before importing the scripts (this may have unintended side effects)
 - Copy `activate.py` and `activate_default.py` files into the app which contains your script (preferred method)
