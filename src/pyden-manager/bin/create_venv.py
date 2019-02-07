@@ -32,7 +32,7 @@ if __name__ == "__main__":
         Intersplunk.generateErrorResults("Python version not found in pyden.conf.")
         sys.exit(1)
     if not config.has_section("default") or not config.has_option("default", "environment"):
-        write_pyden_config(pyden_location, 'default', name, attribute='environment')
+        write_pyden_config(pyden_location, config, 'default', name, attribute='environment')
 
     if version < '3':
         module = "virtualenv"
@@ -47,4 +47,4 @@ if __name__ == "__main__":
     sys.stdout.flush()
     subprocess.call([py_exec, '-m', module, name])
     venv_exec = os.path.join(venv_dir, name, 'bin', 'python')
-    write_pyden_config(pyden_location, name, venv_exec)
+    write_pyden_config(pyden_location, config, name, venv_exec)
