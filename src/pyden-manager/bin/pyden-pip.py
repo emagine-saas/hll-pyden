@@ -22,8 +22,8 @@ if __name__ == "__main__":
     pyden_location, config = load_pyden_config()
     env = False
     pip_arg_index = 1
-    if config.has_option('default', 'environment'):
-        env = config.get('default', 'environment')
+    if config.has_option('default-pys', 'environment'):
+        env = config.get('default-pys', 'environment')
     for arg in sys.argv:
         if 'environment' in arg:
             env = arg.split('=')[1]

@@ -21,8 +21,8 @@ if __name__ == "__main__":
     # get executable
     version = args.get('version')
     if not version:
-        if config.has_option("default", "distribution"):
-            version = config.get("default", "distribution")
+        if config.has_option("default-pys", "distribution"):
+            version = config.get("default-pys", "distribution")
     name = args['name']
     if version in config.sections():
         py_exec = config.get(version, 'executable')
@@ -31,8 +31,8 @@ if __name__ == "__main__":
     if not py_exec:
         Intersplunk.generateErrorResults("Python version not found in pyden.conf.")
         sys.exit(1)
-    if not config.has_section("default") or not config.has_option("default", "environment"):
-        write_pyden_config(pyden_location, config, 'default', name, attribute='environment')
+    if not config.has_section("default-pys") or not config.has_option("default-pys", "environment"):
+        write_pyden_config(pyden_location, config, 'default-pys', name, attribute='environment')
 
     if version < '3':
         module = "virtualenv"

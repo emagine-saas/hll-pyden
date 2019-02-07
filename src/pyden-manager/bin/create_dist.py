@@ -114,8 +114,8 @@ def build_dist(version, download):
     logger.info("Finished building Python %s. Distribution available at %s." % (version, pyden_prefix))
 
     write_pyden_config(pyden_location, config, version, py_exec)
-    if not config.has_section("default") or not config.has_option("default", "distribution"):
-        write_pyden_config(pyden_location, config, 'default', version, attribute='distribution')
+    if not config.has_section("default-pys") or not config.has_option("default-pys", "distribution"):
+        write_pyden_config(pyden_location, config, 'default-pys', version, attribute='distribution')
     return
 
 

@@ -35,7 +35,7 @@ def activate_venv(environment):
 
 def activate_venv_or_die(env=False):
     if not env:
-        env = pyden_config.get('default', 'environment')
+        env = pyden_config.get('default-pys', 'environment')
     try:
         activate_venv(env)
     except ActivationError:
