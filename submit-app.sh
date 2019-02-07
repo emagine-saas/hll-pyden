@@ -20,3 +20,4 @@ if [[ ${pyden_failures} -gt 0 ]]
 then
     echo "There were one or more failures for Pyden app"
 fi
+exit ${pyden_failures}

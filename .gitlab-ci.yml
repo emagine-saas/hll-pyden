@@ -10,6 +10,8 @@ appinspect:
     # first two lines are needed because when gitlab clones the repo it does so with a different set of permissions
     - find src -type d -exec chmod 0755 {} +
     - find src -type f -exec chmod 0644 {} +
+    - find src/pyden-manager/bin -type f -exec chmod 0755 {} +
+    - find src/pyden/bin -type f -exec chmod 0755 {} +
     - tar -czvf pyden.tgz -C src pyden
     - tar -czvf pyden-manager.tgz -C src pyden-manager
     - ./submit-app.sh pyden
