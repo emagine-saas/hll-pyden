@@ -37,6 +37,17 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     owner: "splunk", group: "splunk"
   end
 
+  config.vm.provider "virtualbox" do |v|
+    v.memory = "#{VM_MEMORY}"
+    v.cpus = "#{VM_CPUS}"
+  config.vm.synced_folder "src/pyden", "/opt/splunk/etc/apps/pyden",
+    owner: "splunk", group: "splunk"
+  config.vm.synced_folder "src/pyden-manager", "/opt/splunk/etc/apps/pyden-manager",
+    owner: "splunk", group: "splunk"
+  config.vm.synced_folder "test-app", "/opt/splunk/etc/apps/test-app",
+    owner: "splunk", group: "splunk"
+  end
+
   config.vm.provision "bootstrap", type: "shell" do |s|
     s.privileged = false
     s.name ="Bootstrap Provisioner"

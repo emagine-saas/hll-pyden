@@ -22,12 +22,14 @@ def activate_venv(environment):
         py_exec = pyden_config.get(environment, 'executable')
     else:
         raise ActivationError
-    if sys.argv[-1] == "reloaded":
+
+    # if sys.argv[-1] == "reloaded":
+    if "pyden" in sys.executable:
         reload(os)
         reload(sys)
         return
 
-    sys.argv.append("reloaded")
+    # sys.argv.append("reloaded")
     base = os.path.dirname(os.path.dirname(pyden_config.get(environment, "executable")))
     path = base + "/bin" + os.pathsep + os.environ["PATH"]
     os.execve(py_exec, ['python'] + sys.argv, {"PATH": path})
