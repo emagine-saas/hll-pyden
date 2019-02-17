@@ -22,7 +22,7 @@
       <table id="venvs_table">
         <title>Click a virtual environment to see its packages</title>
         <search id="venvs_search">
-          <query>| getvenvs | eval action=1 | table action environment | append [| makeresults count=1 | eval action=0 | eval environment="$env_name$" | table action environment]</query>
+          <query>| getvenvs | eval action=1 | table action environment version | append [| makeresults count=1 | eval action=0 | eval environment="$env_name$" | table action environment]</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
         </search>

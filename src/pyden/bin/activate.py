@@ -8,8 +8,9 @@ else:
 
 
 pyden_config = ConfigParser()
-pyden_default = os.path.abspath(os.path.join(os.getcwd(), os.pardir, os.pardir, 'pyden', 'default', 'pyden.conf'))
-pyden_local = os.path.abspath(os.path.join(os.getcwd(), os.pardir, os.pardir, 'pyden', 'local', 'pyden.conf'))
+script_dir = os.path.dirname(os.path.realpath(__file__))
+pyden_default = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir, 'pyden', 'default', 'pyden.conf'))
+pyden_local = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir, 'pyden', 'local', 'pyden.conf'))
 pyden_config.read([pyden_default, pyden_local])
 
 
