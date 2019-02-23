@@ -20,8 +20,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "badarsebard/ubuntu-18.04-splunk"
   config.vm.box_version = "7.2.3.0"
   config.vm.define "#{VM_NAME}"
-  config.vm.network "private_network", ip: "192.168.33.10"
   config.vm.hostname = "splunk"
+  config.vm.network "private_network", ip: "192.168.33.10"
   config.vm.network "forwarded_port", guest: 8000, host: 8000
   # You can use public_network, if you prefer:
   # config.vm.network "public_network", bridge: 'en0: Ethernet'
