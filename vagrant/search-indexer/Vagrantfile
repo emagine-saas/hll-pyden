@@ -1,0 +1,122 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
+
+#------------------------------------------------------------------------------
+# Configuration you may want to modify
+#------------------------------------------------------------------------------
+VM_NAME = "splunk"
+VM_MEMORY = 2048
+VM_CPUS = 2
+# this is the password you will set for your splunk admin user
+SPLUNK_PASS  = "changeme1"
+# Splunk home directory
+SPLUNK_HOME  = "/opt/splunk"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+    config.vm.define "#{VM_NAME}-indexer" do |indexer|
+        indexer.vm.box = "badarsebard/ubuntu-18.04-splunk"
+        indexer.vm.box_version = "7.2.3.0"
+        indexer.vm.hostname = "#{VM_NAME}-indexer"
+        indexer.vm.network "private_network", ip: "192.168.33.11"
+        indexer.vm.provision :hosts do |provisioner|
+            provisioner.sync_hosts = true
+            provisioner.imports = ['global']
+            provisioner.exports = {
+                'global' => [
+                    ['@vagrant_private_networks', ['@vagrant_hostnames']],
+                ],
+            }
+        end
+
+        indexer.vm.provider "vmware_desktop" do |v|
+            v.memory = "#{VM_MEMORY}"
+            v.cpus = "#{VM_CPUS}"
+        end
+
+        indexer.vm.provider "virtualbox" do |v|
+            v.memory = "#{VM_MEMORY}"
+            v.cpus = "#{VM_CPUS}"
+        end
+
+        indexer.vm.provision "bootstrap", type: "shell" do |s|
+            s.privileged = false
+            s.name ="Bootstrap Provisioner"
+            s.path = "../../scripts/provision.sh"
+            s.env = {
+                :SPLUNK_HOME  => "#{SPLUNK_HOME}",
+                :SPLUNK_BIN   => "#{SPLUNK_HOME}/bin/splunk",
+                :SPLUNK_PASS  => "#{SPLUNK_PASS}"
+            }
+        end
+
+        indexer.vm.provision "startup", type: "shell", run: "always" do |t|
+            t.privileged = false
+            t.name ="Start up provisioner"
+            t.path = "../../scripts/start-splunk.sh"
+            t.env = { :SPLUNK_BIN   => "/opt/splunk/bin/splunk" }
+        end
+    end
+
+    config.vm.define "#{VM_NAME}-search" do |search|
+        search.vm.box = "badarsebard/ubuntu-18.04-splunk"
+        search.vm.box_version = "7.2.3.0"
+        search.vm.hostname = "#{VM_NAME}-search"
+        search.vm.network "private_network", ip: "192.168.33.10"
+        search.vm.provision :hosts do |provisioner|
+            provisioner.sync_hosts = true
+            provisioner.imports = ['global']
+            provisioner.exports = {
+                'global' => [
+                    ['@vagrant_private_networks', ['@vagrant_hostnames']],
+                ],
+            }
+        end
+
+        search.vm.synced_folder "../../src/pyden", "/opt/splunk/etc/apps/pyden", owner: "splunk", group: "splunk"
+        search.vm.synced_folder "../../src/pyden-manager", "/opt/splunk/etc/apps/pyden-manager", owner: "splunk", group: "splunk"
+        search.vm.synced_folder "../../src/test-app", "/opt/splunk/etc/apps/test-app", owner: "splunk", group: "splunk"
+
+        search.vm.provider "vmware_desktop" do |v|
+            v.memory = "#{VM_MEMORY}"
+            v.cpus = "#{VM_CPUS}"
+        end
+
+        search.vm.provider "virtualbox" do |v|
+            v.memory = "#{VM_MEMORY}"
+            v.cpus = "#{VM_CPUS}"
+        end
+
+        search.vm.provision "bootstrap", type: "shell" do |s|
+            s.privileged = false
+            s.name ="Bootstrap Provisioner"
+            s.path = "../../scripts/provision.sh"
+            s.env = {
+                :SPLUNK_HOME  => "#{SPLUNK_HOME}",
+                :SPLUNK_BIN   => "#{SPLUNK_HOME}/bin/splunk",
+                :SPLUNK_PASS   => "#{SPLUNK_PASS}"
+            }
+        end
+
+        search.vm.provision "startup", type: "shell", run: "always" do |t|
+            t.privileged = false
+            t.name = "Start up provisioner"
+            t.path = "../../scripts/start-splunk.sh"
+            t.env = { :SPLUNK_BIN   => "/opt/splunk/bin/splunk" }
+        end
+
+        search.vm.provision "add peer", type: "shell" do |u|
+            u.privileged = false
+            u.name = "Adding peer node"
+            u.path = "../../scripts/add_peer.sh"
+            u.env = {
+                :SPLUNK_HOME  => "#{SPLUNK_HOME}",
+                :SPLUNK_BIN   => "#{SPLUNK_HOME}/bin/splunk",
+                :SPLUNK_PASS   => "#{SPLUNK_PASS}"
+            }
+        end
+    end
+end
