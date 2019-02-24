@@ -45,7 +45,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         indexer.vm.provision "bootstrap", type: "shell" do |s|
             s.privileged = false
             s.name ="Bootstrap Provisioner"
-            s.path = "../../scripts/provision.sh"
+            s.path = "../scripts/provision.sh"
             s.env = {
                 :SPLUNK_HOME  => "#{SPLUNK_HOME}",
                 :SPLUNK_BIN   => "#{SPLUNK_HOME}/bin/splunk",
@@ -56,7 +56,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         indexer.vm.provision "startup", type: "shell", run: "always" do |t|
             t.privileged = false
             t.name ="Start up provisioner"
-            t.path = "../../scripts/start-splunk.sh"
+            t.path = "../scripts/start-splunk.sh"
             t.env = { :SPLUNK_BIN   => "/opt/splunk/bin/splunk" }
         end
     end
@@ -93,7 +93,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         deployer.vm.provision "bootstrap", type: "shell" do |s|
             s.privileged = false
             s.name ="Bootstrap Provisioner"
-            s.path = "../../scripts/provision.sh"
+            s.path = "../scripts/provision.sh"
             s.env = {
                 :SPLUNK_HOME  => "#{SPLUNK_HOME}",
                 :SPLUNK_BIN   => "#{SPLUNK_HOME}/bin/splunk",
@@ -104,14 +104,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         deployer.vm.provision "startup", type: "shell", run: "always" do |t|
             t.privileged = false
             t.name ="Start up provisioner"
-            t.path = "../../scripts/start-splunk.sh"
+            t.path = "../scripts/start-splunk.sh"
             t.env = { :SPLUNK_BIN   => "/opt/splunk/bin/splunk" }
         end
 
         deployer.vm.provision "add peer", type: "shell" do |u|
             u.privileged = false
             u.name = "Adding peer node"
-            u.path = "../../scripts/add_peer.sh"
+            u.path = "../scripts/add_peer.sh"
             u.env = {
                 :SPLUNK_HOME  => "#{SPLUNK_HOME}",
                 :SPLUNK_BIN   => "#{SPLUNK_HOME}/bin/splunk",
@@ -122,7 +122,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         deployer.vm.provision "configure deployer", type: "shell" do |v|
             v.privileged = false
             v.name = "Configuring server as deployer"
-            v.path = "../../scripts/config_deployer.sh"
+            v.path = "../scripts/config_deployer.sh"
             v.env = {
                 :SPLUNK_HOME  => "#{SPLUNK_HOME}",
                 :SPLUNK_BIN   => "#{SPLUNK_HOME}/bin/splunk",
@@ -160,7 +160,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
             search.vm.provision "bootstrap", type: "shell" do |s|
                 s.privileged = false
                 s.name ="Bootstrap Provisioner"
-                s.path = "../../scripts/provision.sh"
+                s.path = "../scripts/provision.sh"
                 s.env = {
                     :SPLUNK_HOME  => "#{SPLUNK_HOME}",
                     :SPLUNK_BIN   => "#{SPLUNK_HOME}/bin/splunk",
@@ -171,14 +171,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
             search.vm.provision "startup", type: "shell", run: "always" do |t|
                 t.privileged = false
                 t.name = "Start up provisioner"
-                t.path = "../../scripts/start-splunk.sh"
+                t.path = "../scripts/start-splunk.sh"
                 t.env = { :SPLUNK_BIN   => "/opt/splunk/bin/splunk" }
             end
 
             search.vm.provision "add peer", type: "shell" do |u|
                 u.privileged = false
                 u.name = "Adding peer node"
-                u.path = "../../scripts/add_peer.sh"
+                u.path = "../scripts/add_peer.sh"
                 u.env = {
                     :SPLUNK_HOME  => "#{SPLUNK_HOME}",
                     :SPLUNK_BIN   => "#{SPLUNK_HOME}/bin/splunk",
@@ -189,7 +189,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
             search.vm.provision "configure shcluster", type: "shell" do |u|
                 u.privileged = false
                 u.name = "Configure Search Head Cluster"
-                u.path = "../../scripts/config_shcluster.sh"
+                u.path = "../scripts/config_shcluster.sh"
                 u.env = {
                     :SPLUNK_BIN   => "#{SPLUNK_HOME}/bin/splunk",
                     :SPLUNK_PASS  => "#{SPLUNK_PASS}",
@@ -201,7 +201,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                 search.vm.provision "bootstrap captain", type: "shell" do |u|
                     u.privileged = false
                     u.name = "Bootstraping SHC Captain"
-                    u.path = "../../scripts/bootstrap_captain.sh"
+                    u.path = "../scripts/bootstrap_captain.sh"
                     u.env = {
                         :SPLUNK_HOME  => "#{SPLUNK_HOME}",
                         :SPLUNK_BIN   => "#{SPLUNK_HOME}/bin/splunk",

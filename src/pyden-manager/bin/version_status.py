@@ -7,6 +7,7 @@ from ConfigParser import ConfigParser
 def main():
     versionfield = sys.argv[1]
     statusfield = sys.argv[2]
+    is_defaultfield = sys.argv[3]
 
     infile = sys.stdin
     outfile = sys.stdout
@@ -32,6 +33,7 @@ def main():
             sys.exit(1)
         version = result[versionfield]
         result[statusfield] = 1 if version in pyden_config.sections() else 0
+        result[is_defaultfield] = 1 if version == pyden_config.get("default-pys", "distribution") else 0
         w.writerow(result)
 
 

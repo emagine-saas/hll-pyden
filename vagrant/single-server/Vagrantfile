@@ -11,7 +11,7 @@ VM_NAME = "splunk-sandbox"
 VM_MEMORY = 2048
 VM_CPUS = 2
 # this is the password you will set for your splunk admin user
-SPLUNK_PASS  = "changeme"
+SPLUNK_PASS  = "changeme1"
 # Splunk home directory
 SPLUNK_HOME  = "/opt/splunk"
 
@@ -41,7 +41,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         config.vm.provision "bootstrap", type: "shell" do |s|
             s.privileged = false
             s.name ="Bootstrap Provisioner"
-            s.path = "../../scripts/provision.sh"
+            s.path = "../scripts/provision.sh"
             s.env = {
                 :SPLUNK_HOME  => "#{SPLUNK_HOME}",
                 :SPLUNK_BIN   => "#{SPLUNK_HOME}/bin/splunk",
@@ -52,7 +52,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         config.vm.provision "startup", type: "shell", run: "always" do |t|
             t.privileged = false
             t.name ="Start up provisioner"
-            t.path = "../../scripts/start-splunk.sh"
+            t.path = "../scripts/start-splunk.sh"
             t.env = { :SPLUNK_BIN   => "/opt/splunk/bin/splunk" }
         end
 end

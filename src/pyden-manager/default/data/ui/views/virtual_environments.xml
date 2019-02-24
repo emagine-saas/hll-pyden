@@ -1,6 +1,6 @@
 <form script="venvs_icons.js" stylesheet="decorations.css">
   <label>Virtual Environments</label>
-  <fieldset submitButton="false" autoRun="false">
+  <fieldset submitButton="true" autoRun="false">
     <input type="text" token="env_name" searchWhenChanged="true">
       <label>New Environment</label>
       <default>Create new environment</default>
@@ -15,6 +15,16 @@
         <latest>now</latest>
       </search>
     </input>
+    <input type="dropdown" token="venv_default">
+      <label>Change Default</label>
+      <fieldForLabel>environment</fieldForLabel>
+      <fieldForValue>environment</fieldForValue>
+      <search>
+        <query>| getvenvs | where is_default==0</query>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
   </fieldset>
   <row>
     <panel>
@@ -22,14 +32,15 @@
       <table id="venvs_table">
         <title>Click a virtual environment to see its packages</title>
         <search id="venvs_search">
-          <query>| getvenvs | eval action=1 | table action environment version | append [| makeresults count=1 | eval action=0 | eval environment="$env_name$" | table action environment]</query>
+          <query>| getvenvs | eval action=1 | eval environment=if(is_default==1,environment." (Default)", environment) | table action environment version | append [| makeresults count=1 | eval action=0 | eval environment="$env_name$" | table action environment]</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
         </search>
         <option name="count">100</option>
-        <option name="drilldown">cell</option>
+        <option name="drilldown">row</option>
+        <option name="refresh.display">progressbar</option>
         <drilldown>
-          <set token="env_clicked">$click.value2$</set>
+          <eval token="env_clicked">replace($row.environment$, " [(]Default[)]", "")</eval>
         </drilldown>
       </table>
     </panel>

@@ -1,22 +1,36 @@
-<dashboard script="version_icons.js" stylesheet="decorations.css">
+<form script="version_icons.js" stylesheet="decorations.css">
   <label>Python Versions</label>
+  <search id="baseSearch">
+    <query>
+      <![CDATA[
+        | getversions | lookup versionstatus version | rex field=version "(?<v_M>\d+)\.(?<v_m>\d+)\.(?<v_mm>\d+)" | eval v_M=tonumber(v_M), v_m=tonumber(v_m), v_mm=tonumber(v_mm) | sort -v_M, -v_m, -v_mm
+      ]]>
+    </query>
+    <earliest>-24h@h</earliest>
+    <latest>now</latest>
+  </search>
+  <fieldset submitButton="true">
+    <input type="dropdown" token="version_default">
+      <label>Change Default</label>
+      <fieldForLabel>version</fieldForLabel>
+      <fieldForValue>version</fieldForValue>
+      <search base="baseSearch">
+        <query>where status==1 and is_default==0</query>
+      </search>
+    </input>
+  </fieldset>
   <row>
     <panel>
       <table id="version_table">
         <title>Click the green button to download and compile. Click the red button to remove from PyDen.</title>
-        <search>
-          <query>
-            <![CDATA[
-            | getversions | lookup versionstatus version | rex field=version "(?<v_M>\d+)\.(?<v_m>\d+)\.(?<v_mm>\d+)" | eval v_M=tonumber(v_M), v_m=tonumber(v_m), v_mm=tonumber(v_mm) | sort -v_M, -v_m, -v_mm | table status version
-            ]]>
-          </query>
-          <earliest>-24h@h</earliest>
-          <latest>now</latest>
+        <search base="baseSearch">
+          <query>eval version=if(is_default==1,version." (Default)", version) | table status version</query>
         </search>
         <option name="count">100</option>
         <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
         <option name="wrap">true</option>
       </table>
     </panel>
   </row>
-</dashboard>
+</form>

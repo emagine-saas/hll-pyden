@@ -21,4 +21,6 @@ if __name__ == "__main__":
         output, err = p.communicate()
         version = (output + err).strip()
         result['version'] = version
+        result["is_default"] = 1 if result['environment'] == config.get("default-pys", "environment") else 0
+
     Intersplunk.outputResults(results)

@@ -70,4 +70,15 @@ require([
         // Register custom cell renderer, the table will re-render automatically
         tableView.addCellRenderer(new RangeMapIconRenderer());
     });
+    $('#submit > button').on("click", function (e) {
+        // run search to set default to input token value and reload on succesfull callback
+        var tokens = mvc.Components.get("default");
+        var version_default = tokens.get("version_default");
+        var job_url = location.origin + "/" + location.href.split("/")[3] + "/splunkd/__raw/servicesNS/nobody/pyden-manager/search/jobs";
+        var params = {
+            "exec_mode": "blocking",
+            "search": "| changedefaultpys distribution=" + version_default
+        };
+        $.post(job_url, params, function() {window.location = window.location.href.split("?")[0];})
+    });
 });
