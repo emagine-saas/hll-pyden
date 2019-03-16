@@ -11,7 +11,7 @@
   </search>
   <fieldset submitButton="true">
     <input type="dropdown" token="version_default">
-      <label>Change Default</label>
+      <label>Change Default Python Version</label>
       <fieldForLabel>version</fieldForLabel>
       <fieldForValue>version</fieldForValue>
       <search base="baseSearch">

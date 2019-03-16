@@ -8,13 +8,13 @@ def main(dist, env):
     pyden_location, config = load_pyden_config()
     if dist:
         if dist in config.sections():
-            write_pyden_config(pyden_location, config, "default-pys", dist, attribute="distribution")
+            write_pyden_config(pyden_location, config, "default-pys", "distribution", dist)
         else:
             Intersplunk.generateErrorResults("The Python version %s is not installed yet." % dist)
             sys.exit(1)
     if env:
         if env in config.sections():
-            write_pyden_config(pyden_location, config, "default-pys", env, attribute="environment")
+            write_pyden_config(pyden_location, config, "default-pys", "environment", env)
         else:
             Intersplunk.generateErrorResults("The virtual environment %s does not exist." % env)
             sys.exit(1)

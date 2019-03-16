@@ -12,32 +12,32 @@ import shutil
 from utils import load_pyden_config, write_pyden_config
 
 
-def download_python(version, session_key, build_path):
+def download_python(version, build_path):
     base_url = simpleRequest("/servicesNS/nobody/pyden-manager/properties/pyden/download/url",
                              sessionKey=session_key)[1]
     try:
-        r = requests.get(base_url + "{0}/".format(version))
+        dpr = requests.get(base_url + "{0}/".format(version))
     except Exception as ex:
         Intersplunk.generateErrorResults("Exception thrown getting python: ({0}, {1})".format(type(ex), ex))
         sys.exit(1)
     else:
-        if r.status_code in range(200, 300):
-            python_link = [link for link in re.findall("href=\"(.*?)\"", r.content) if link.endswith('tgz')][0]
-            r = requests.get(base_url + "{0}/{1}".format(version, python_link))
+        if dpr.status_code in range(200, 300):
+            python_link = [link for link in re.findall("href=\"(.*?)\"", dpr.content) if link.endswith('tgz')][0]
+            dpr = requests.get(base_url + "{0}/{1}".format(version, python_link))
         else:
             Intersplunk.generateErrorResults(
                 "Failed to reach www.python.org. Request returned - Status code: {0}, Response: {1}".format(
-                    r.status_code, r.text))
+                    dpr.status_code, dpr.text))
             sys.exit(1)
-    if r.status_code in range(200, 300):
+    if dpr.status_code in range(200, 300):
         # save
         build_file = os.path.join(build_path, "Python-{0}.tgz".format(version))
         with open(build_file, "w") as download:
-            download.write(r.content)
+            download.write(dpr.content)
     else:
         Intersplunk.generateErrorResults(
-            "Failed to download python. Request returned - Status code: {0}, Response: {1}".format(r.status_code,
-                                                                                                   r.text))
+            "Failed to download python. Request returned - Status code: {0}, Response: {1}".format(dpr.status_code,
+                                                                                                   dpr.text))
         sys.exit(1)
     return build_file
 
@@ -54,7 +54,7 @@ def build_dist(version, download):
         os.mkdir(build_path)
     if download is True:
         logger.debug("Downloading Python")
-        build_file = download_python(version, session_key, build_path)
+        build_file = download_python(version, build_path)
     else:
         logger.debug("Using existing archive")
         build_file = os.path.join(build_path, download)
@@ -109,13 +109,12 @@ def build_dist(version, download):
     # Running get-pip and others
     logger.debug("Upgrading pip")
     call([py_exec, '-m', 'pip', 'install', '--upgrade', 'pip'])
-    if version < '3':
-        call([py_exec, '-m', 'pip', 'install', 'virtualenv'])
+    call([py_exec, '-m', 'pip', 'install', 'virtualenv'])
     logger.info("Finished building Python %s. Distribution available at %s." % (version, pyden_prefix))
 
-    write_pyden_config(pyden_location, config, version, py_exec)
+    write_pyden_config(pyden_location, config, version, "executable", py_exec.lstrip(os.environ['SPLUNK_HOME']))
     if not config.has_section("default-pys") or not config.has_option("default-pys", "distribution"):
-        write_pyden_config(pyden_location, config, 'default-pys', version, attribute='distribution')
+        write_pyden_config(pyden_location, config, 'default-pys', 'distribution', version)
     return
 
 
@@ -127,17 +126,20 @@ if __name__ == "__main__":
     session_key = settings['sessionKey']
     latest_python_search = r"""
     | getversions 
-    | lookup versionstatus version 
     | rex field=version "(?<v_M>\d+)\.(?<v_m>\d+)\.(?<v_mm>\d+)" 
     | eval v_M=tonumber(v_M), v_m=tonumber(v_m), v_mm=tonumber(v_mm) 
     | sort -v_M, -v_m, -v_mm 
     | table version 
-    | head 1 
+    | head 1
     """
-    r = simpleRequest("/servicesNS/nobody/pyden-manager/search/jobs",
-                      postargs={'search': latest_python_search, 'exec_mode': 'oneshot', 'output_mode': 'json'},
-                      sessionKey=session_key)
-    dist_version = json.loads(r[1])['results'][0]['version']
+    try:
+        r = simpleRequest("/servicesNS/nobody/pyden-manager/search/jobs",
+                          postargs={'search': latest_python_search, 'exec_mode': 'oneshot', 'output_mode': 'json'},
+                          sessionKey=session_key)
+        dist_version = json.loads(r[1])['results'][0]['version']
+    except Exception as e:
+        Intersplunk.generateErrorResults("Failed to find latest version of Python: %s." % e)
+        sys.exit(1)
     for arg in sys.argv:
         if "version" in arg:
             dist_version = arg.split("=")[1]

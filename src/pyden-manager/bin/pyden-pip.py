@@ -13,9 +13,9 @@ def activate():
         return
 
     sys.argv.append("reloaded")
-    base = os.path.dirname(os.path.dirname(py_exec))
-    path = base + "/bin" + os.pathsep + os.environ["PATH"]
-    os.execve(py_exec, ['python'] + sys.argv, {"PATH": path})
+    bin_dir = os.path.dirname(py_exec)
+    path = bin_dir + os.pathsep + os.environ["PATH"]
+    os.execve(py_exec, ['python'] + sys.argv, {"PATH": path, "SPLUNK_HOME": os.environ['SPLUNK_HOME']})
 
 
 if __name__ == "__main__":
@@ -31,7 +31,7 @@ if __name__ == "__main__":
             break
     if not env:
         sys.exit(1)
-    py_exec = config.get(env, 'executable')
+    py_exec = os.path.join(os.environ['SPLUNK_HOME'], config.get(env, 'executable'))
     activate()
     sys.stdout.write("messages\n")
     sys.stdout.flush()

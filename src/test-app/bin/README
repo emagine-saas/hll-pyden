@@ -1,4 +1,0 @@
-This test app is for verifying the effectiveness of the PyDen activation scripts.
-
-The hello script is a modular input that prints out events with the input configured name as well as the sys.executable
-and sys.version. By changing the virtual environments referenced (or removing) we can tell which Python is being used.

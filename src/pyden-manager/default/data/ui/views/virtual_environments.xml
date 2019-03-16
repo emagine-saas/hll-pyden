@@ -16,7 +16,7 @@
       </search>
     </input>
     <input type="dropdown" token="venv_default">
-      <label>Change Default</label>
+      <label>Change Default Virtual Environment</label>
       <fieldForLabel>environment</fieldForLabel>
       <fieldForValue>environment</fieldForValue>
       <search>

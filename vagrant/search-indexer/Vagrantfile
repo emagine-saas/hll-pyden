@@ -4,10 +4,6 @@
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
-#------------------------------------------------------------------------------
-# Configuration you may want to modify
-#------------------------------------------------------------------------------
-VM_NAME = "splunk"
 VM_MEMORY = 2048
 VM_CPUS = 2
 # this is the password you will set for your splunk admin user
@@ -17,11 +13,10 @@ SPLUNK_HOME  = "/opt/splunk"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
-    config.vm.define "#{VM_NAME}-indexer" do |indexer|
+    config.vm.define "indexer" do |indexer|
         indexer.vm.box = "badarsebard/ubuntu-18.04-splunk"
-        indexer.vm.box_version = "7.2.3.0"
-        indexer.vm.hostname = "#{VM_NAME}-indexer"
-        indexer.vm.network "private_network", ip: "192.168.33.11"
+        indexer.vm.hostname = "indexer"
+        indexer.vm.network "private_network", ip: "192.168.34.11"
         indexer.vm.provision :hosts do |provisioner|
             provisioner.sync_hosts = true
             provisioner.imports = ['global']
@@ -31,6 +26,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                 ],
             }
         end
+
+        indexer.vm.synced_folder "../../src/pyden", "/opt/splunk/etc/apps/pyden", owner: "splunk", group: "splunk"
 
         indexer.vm.provider "vmware_desktop" do |v|
             v.memory = "#{VM_MEMORY}"
@@ -59,13 +56,16 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
             t.path = "../scripts/start-splunk.sh"
             t.env = { :SPLUNK_BIN   => "/opt/splunk/bin/splunk" }
         end
+
+        indexer.trigger.before :halt do |trigger|
+            trigger.run_remote = {inline: "sudo -u splunk /opt/splunk/bin/splunk stop -f"}
+        end
     end
 
-    config.vm.define "#{VM_NAME}-search" do |search|
+    config.vm.define "search" do |search|
         search.vm.box = "badarsebard/ubuntu-18.04-splunk"
-        search.vm.box_version = "7.2.3.0"
-        search.vm.hostname = "#{VM_NAME}-search"
-        search.vm.network "private_network", ip: "192.168.33.10"
+        search.vm.hostname = "search"
+        search.vm.network "private_network", ip: "192.168.34.10"
         search.vm.provision :hosts do |provisioner|
             provisioner.sync_hosts = true
             provisioner.imports = ['global']
@@ -78,7 +78,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
         search.vm.synced_folder "../../src/pyden", "/opt/splunk/etc/apps/pyden", owner: "splunk", group: "splunk"
         search.vm.synced_folder "../../src/pyden-manager", "/opt/splunk/etc/apps/pyden-manager", owner: "splunk", group: "splunk"
-        search.vm.synced_folder "../../src/test-app", "/opt/splunk/etc/apps/test-app", owner: "splunk", group: "splunk"
+        search.vm.synced_folder "../../src/pyden-examples", "/opt/splunk/etc/apps/pyden-examples", owner: "splunk", group: "splunk"
 
         search.vm.provider "vmware_desktop" do |v|
             v.memory = "#{VM_MEMORY}"
@@ -117,6 +117,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                 :SPLUNK_BIN   => "#{SPLUNK_HOME}/bin/splunk",
                 :SPLUNK_PASS   => "#{SPLUNK_PASS}"
             }
+        end
+
+        search.trigger.before :halt do |trigger|
+            trigger.run_remote = {inline: "sudo -u splunk /opt/splunk/bin/splunk stop -f"}
         end
     end
 end

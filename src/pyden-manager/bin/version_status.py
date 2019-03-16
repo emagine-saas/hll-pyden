@@ -26,6 +26,10 @@ def main():
     pyden_config = ConfigParser()
     pyden_local_conf = os.path.abspath(os.path.join(pyden_location, 'local', 'pyden.conf'))
     pyden_config.read([pyden_local_conf])
+    if pyden_config.has_option("default-pys", "distribution"):
+        default_version = pyden_config.get("default-pys", "distribution")
+    else:
+        default_version = None
 
     for result in r:
         if versionfield not in result.keys():
@@ -33,7 +37,7 @@ def main():
             sys.exit(1)
         version = result[versionfield]
         result[statusfield] = 1 if version in pyden_config.sections() else 0
-        result[is_defaultfield] = 1 if version == pyden_config.get("default-pys", "distribution") else 0
+        result[is_defaultfield] = 1 if version == default_version else 0
         w.writerow(result)
 
 

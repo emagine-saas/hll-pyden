@@ -25,19 +25,14 @@ if __name__ == "__main__":
             version = config.get("default-pys", "distribution")
     name = args['name']
     if version in config.sections():
-        py_exec = config.get(version, 'executable')
+        py_exec = os.path.join(os.environ['SPLUNK_HOME'], config.get(version, 'executable'))
     else:
         py_exec = False
     if not py_exec:
         Intersplunk.generateErrorResults("Python version not found in pyden.conf.")
         sys.exit(1)
-    if not config.has_section("default-pys") or not config.has_option("default-pys", "environment"):
-        write_pyden_config(pyden_location, config, 'default-pys', name, attribute='environment')
-
-    if version < '3':
-        module = "virtualenv"
-    else:
-        module = 'venv'
+    if not config.has_option("default-pys", "environment"):
+        write_pyden_config(pyden_location, config, 'default-pys', 'environment', name)
 
     venv_dir = os.path.join(pyden_location, 'local', 'lib', 'venv')
     if not os.path.isdir(venv_dir):
@@ -45,6 +40,7 @@ if __name__ == "__main__":
     os.chdir(venv_dir)
     sys.stdout.write("messages\n")
     sys.stdout.flush()
-    subprocess.call([py_exec, '-m', module, name])
+    subprocess.call([py_exec, '-m', "virtualenv", name])
     venv_exec = os.path.join(venv_dir, name, 'bin', 'python')
-    write_pyden_config(pyden_location, config, name, venv_exec)
+    write_pyden_config(pyden_location, config, name, "executable", venv_exec.lstrip(os.environ['SPLUNK_HOME']))
+    write_pyden_config(pyden_location, config, name, 'version', version)
