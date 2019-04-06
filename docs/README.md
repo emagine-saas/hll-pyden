@@ -21,17 +21,21 @@ PyDen is broken into two separate Splunk apps called: PyDen and PyDen Manager. T
 
 For a single search head environment the PyDen app can be placed along side the PyDen Manager in the Splunk apps directory. 
 
-In a deployment with multiple search heads, PyDen can be placed onto the deployment server repository location. 
+In a deployment with multiple search heads, PyDen can be placed onto the deployment server repository location, `deployment-apps` by default. 
 
-In a deployment utilizing search head clustering, it can be placed into the deployer's shcluster/apps directory. 
+In a deployment utilizing search head clustering, it can be placed into the deployer's `shcluster/apps` directory. 
 
-In all of these scenarios, PyDen Mnagaer must be installed to the same host as PyDen. The `pyden.conf` configuration file inside of the PyDen Manager app contains a stanza called `app` which has a `location` attribute which should specific the absolute path of the PyDen app. 
+In all of these scenarios, PyDen Mnagaer must be installed to the same host as PyDen. The `pyden.conf` configuration file inside of the PyDen Manager app contains a stanza called `app` which has a `location` attribute which should specify the absolute path of the PyDen app. Additionally, the PyDen Manager host and the eventual deployment host(s) for PyDen (e.g. members of a search head cluster) should be running the same platform.
+
+If there is a need to utilize the virtual environments for scripts that are dispatched to the indexer layer, PyDen will also need to be deployed to any indexer that may need it. There is currently no specific recommendation on how to accomplish this as there are separate management servers for search head and indexer clusters. 
 
 # Compatibility
 The PyDen suite of apps has been tested for compatibility with Splunk 7.2. Use with other version of Splunk are considered experimental and should be tested thoroughly. 
 
 # Requirements
 The app builds CPython from source and therefore the success of the build is highly dependent on the operating system libraries available. The host OS must have a compiler and the packages needed in order to build Python from source. Please refer to the documentation for your OS for needed packages. Two options are included in the ./configure command during the Python build process: `--enable-optimizations` (if configured) and `--with-ensurepip=install`.
+
+Currently only Linux-based platforms are supported. In theory, this should work on OSX but this is as of yet untested. Further platform support will be developed if requested.
 
 # Installation and Configuration
 Installation of the PyDen Manager follows the same process as any other Splunk app. Please refer to Splunk's [documentation](https://docs.splunk.com/Documentation/Splunk/7.2.3/Admin/Deployappsandadd-ons) on the subject. The PyDen app installation process will vary depending on the Splunk deployment architecture. Please see the [Architecture](#Architecture) section for details on where to install PyDen. If PyDen is installed to any location other than the Splunk apps directory, the installation process will consist of extracting the app from the gzipped tarball and placing it in the specified directory on the host.
