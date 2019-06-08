@@ -2,7 +2,7 @@ import sys
 import os
 import tarfile
 import json
-from subprocess import call
+import subprocess
 from splunk.rest import simpleRequest
 from splunk import Intersplunk
 import requests
@@ -84,15 +84,32 @@ def build_dist(version, download):
                                   sessionKey=session_key)[1]
     optimize = '--enable-optimizations' if optimize_conf in ['true', 'True', '1'] else ''
     logger.debug("Configuring source")
-    call([os.path.join(os.curdir, 'configure'),
-          optimize,
-          '--with-ensurepip=install',
-          '--prefix={0}'.format(pyden_prefix)])
+    configure = subprocess.Popen([os.path.join(os.curdir, 'configure'), optimize, '--with-ensurepip=install', '--prefix={0}'.format(pyden_prefix)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    result, error = configure.communicate()
+    for message in result.split('\n'):
+        if message:
+            logger.info(message)
+    for message in error.split('\n'):
+        if message:
+            logger.error(message)
     logger.debug("Making")
-    call(['make'])
+    make = subprocess.Popen(['make'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    result, error = make.communicate()
+    for message in result.split('\n'):
+        if message:
+            logger.info(message)
+    for message in error.split('\n'):
+        if message:
+            logger.error(message)
     logger.debug("Make install")
-    call(['make', 'altinstall'])
-
+    install = subprocess.Popen(['make', 'altinstall'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    result, error = install.communicate()
+    for message in result.split('\n'):
+        if message:
+            logger.info(message)
+    for message in error.split('\n'):
+        if message:
+            logger.error(message)
     logger.debug("Determining binary of %s" % pyden_prefix)
     bin_dir = os.path.join(pyden_prefix, 'bin')
     os.chdir(bin_dir)
@@ -122,8 +139,11 @@ if __name__ == "__main__":
     logger = setup_logging()
     download_arg = True
     settings = dict()
-    Intersplunk.readResults(settings=settings)
-    session_key = settings['sessionKey']
+    if "--cli" in sys.argv:
+        session_key = sys.stdin.read()
+    else:
+        Intersplunk.readResults(settings=settings)
+        session_key = settings['sessionKey']
     latest_python_search = r"""
     | getversions 
     | rex field=version "(?<v_M>\d+)\.(?<v_m>\d+)\.(?<v_mm>\d+)" 

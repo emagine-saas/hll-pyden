@@ -1,7 +1,7 @@
 .idea/
 .vagrant/
-**/local/*
-**/metadata/local.meta
+src/*/local/*
+src/*/metadata/local.meta
 src/pyden-manager/bin/build/*
 !src/pyden-manager/bin/build/README
 python-logo.xcf

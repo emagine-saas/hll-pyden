@@ -1,22 +1,41 @@
 import sys
 import os
 import subprocess
-from splunk import Intersplunk
+from splunk_logger import setup_logging
 from utils import load_pyden_config, write_pyden_config
+if sys.version < '3':
+    pass
+else:
+    from importlib import reload
+
+
+def activate():
+    if sys.argv[-1] == "reloaded":
+        reload(os)
+        reload(sys)
+        return
+
+    sys.argv.append("reloaded")
+    bin_dir = os.path.dirname(py_exec)
+    path = bin_dir + os.pathsep + os.environ["PATH"]
+    os.execve(py_exec, ['python'] + sys.argv, {"PATH": path, "SPLUNK_HOME": os.environ['SPLUNK_HOME']})
 
 
 if __name__ == "__main__":
+    logger = setup_logging()
     args = dict()
     for arg in sys.argv[1:]:
         try:
+            if "reloaded" in arg:
+                continue
             k, v = arg.split('=')
             args[k] = v
         except ValueError:
-            Intersplunk.generateErrorResults("Incorrect argument provided")
+            logger.error("Incorrect argument provided")
             sys.exit(1)
     pyden_location, config = load_pyden_config()
     if 'name' not in args:
-        Intersplunk.generateErrorResults("No name for the new environment was provided.")
+        logger.error("No name for the new environment was provided.")
         sys.exit(1)
     # get executable
     version = args.get('version')
@@ -26,10 +45,9 @@ if __name__ == "__main__":
     name = args['name']
     if version in config.sections():
         py_exec = os.path.join(os.environ['SPLUNK_HOME'], config.get(version, 'executable'))
+        activate()
     else:
-        py_exec = False
-    if not py_exec:
-        Intersplunk.generateErrorResults("Python version not found in pyden.conf.")
+        logger.error("Python version not found in pyden.conf.")
         sys.exit(1)
     if not config.has_option("default-pys", "environment"):
         write_pyden_config(pyden_location, config, 'default-pys', 'environment', name)

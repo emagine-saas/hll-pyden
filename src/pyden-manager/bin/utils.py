@@ -31,5 +31,5 @@ def write_pyden_config(pyden_location, config, stanza, attribute, value):
     if not config.has_section(stanza):
         config.add_section(stanza)
     config.set(stanza, attribute, value)
-    with open(local_conf, 'wb') as f:
+    with open(local_conf, 'w') as f:
         config.write(f)

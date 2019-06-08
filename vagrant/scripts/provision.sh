@@ -6,7 +6,8 @@ sudo -u splunk cp /home/vagrant/.profile ${SPLUNK_HOME}/.profile
 echo "alias splunk=${SPLUNK_BIN}" | sudo tee -a ${SPLUNK_HOME}/.bashrc > /dev/null
 echo "splunk:${SPLUNK_PASS}" | sudo chpasswd
 sudo apt-get update -y
-sudo apt-get install -yq sshpass build-essential libncurses5-dev libgdbm-dev libdb5.3-dev libbz2-dev liblzma-dev libsqlite3-dev libffi-dev tcl-dev tk tk-dev libdb-dev libexpat-dev libpcap-dev libpcre3-dev
+sudo apt-get install -yq sshpass build-essential
+# sudo apt-get install -yq sshpass build-essential libncurses5-dev libgdbm-dev libdb5.3-dev libbz2-dev liblzma-dev libsqlite3-dev libffi-dev tcl-dev tk tk-dev libdb-dev libexpat-dev libpcap-dev libpcre3-dev
 cat << EOF | sudo -u splunk tee -a ${SPLUNK_HOME}/etc/system/local/user-seed.conf
 [user_info]
 USERNAME = admin
