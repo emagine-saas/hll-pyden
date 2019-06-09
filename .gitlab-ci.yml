@@ -18,7 +18,13 @@ appinspect:
     - manager_failures=$(echo $?)
     - x=$(( $pyden_failures + $manager_failures ))
     - if [[ $x -gt 0 ]]; then echo "There were $x failures in apps."; exit 1; fi
-
+  artifacts:
+    when: always
+    paths:
+      - pyden.html
+      - pyden-manager.html
+      - pyden.tgz
+      - pyden-manager.tgz
   tags:
     - docker
 
