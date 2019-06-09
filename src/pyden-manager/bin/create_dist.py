@@ -81,15 +81,17 @@ def build_dist(version, download):
     optimize_conf = simpleRequest("/servicesNS/nobody/pyden-manager/properties/pyden/app/optimize",
                                   sessionKey=session_key)[1]
     optimize = '--enable-optimizations' if optimize_conf in ['true', 'True', '1'] else ''
+    # remove environment variables. needed to use host libraries instead of splunk's built-in.
+    del os.environ['LD_LIBRARY_PATH']
+    del os.environ['OPENSSL_CONF']
+    del os.environ['PYTHONPATH']
     logger.debug("Configuring source")
     configure = subprocess.Popen([os.path.join(os.curdir, 'configure'),
                                   optimize,
                                   '--with-ensurepip=install',
                                   '--prefix={0}'.format(pyden_prefix)],
                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                 universal_newlines=True)
-    if configure.returncode != 0:
-        sys.exit(1)
+                                 universal_newlines=True, env=os.environ)
     result, error = configure.communicate()
     for message in result.split('\n'):
         if message:
@@ -97,10 +99,11 @@ def build_dist(version, download):
     for message in error.split('\n'):
         if message:
             logger.error(message)
-    logger.debug("Making")
-    make = subprocess.Popen(['make'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
-    if make.returncode != 0:
+    if configure.returncode != 0:
         sys.exit(1)
+    logger.debug("Making")
+    make = subprocess.Popen(['make'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True,
+                            env=os.environ)
     result, error = make.communicate()
     for message in result.split('\n'):
         if message:
@@ -108,11 +111,11 @@ def build_dist(version, download):
     for message in error.split('\n'):
         if message:
             logger.error(message)
+    if make.returncode != 0:
+        sys.exit(1)
     logger.debug("Make install")
     install = subprocess.Popen(['make', 'altinstall'], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                               universal_newlines=True)
-    if install.returncode != 0:
-        sys.exit(1)
+                               universal_newlines=True, env=os.environ)
     result, error = install.communicate()
     for message in result.split('\n'):
         if message:
@@ -120,6 +123,8 @@ def build_dist(version, download):
     for message in error.split('\n'):
         if message:
             logger.error(message)
+    if install.returncode != 0:
+        sys.exit(1)
     logger.debug("Determining binary of %s" % pyden_prefix)
     bin_dir = os.path.join(pyden_prefix, 'bin')
     os.chdir(bin_dir)
@@ -136,7 +141,7 @@ def build_dist(version, download):
     # Running get-pip and others
     logger.debug("Upgrading pip")
     pip = subprocess.Popen([py_exec, '-m', 'pip', 'install', '--upgrade', 'pip'], stdout=subprocess.PIPE,
-                           stderr=subprocess.PIPE, universal_newlines=True)
+                           stderr=subprocess.PIPE, universal_newlines=True, env=os.environ)
     result, error = pip.communicate()
     for message in result.split('\n'):
         if message:
@@ -145,7 +150,7 @@ def build_dist(version, download):
         if message:
             logger.error(message)
     pip = subprocess.Popen([py_exec, '-m', 'pip', 'install', 'virtualenv'], stdout=subprocess.PIPE,
-                           stderr=subprocess.PIPE, universal_newlines=True)
+                           stderr=subprocess.PIPE, universal_newlines=True, env=os.environ)
     result, error = pip.communicate()
     for message in result.split('\n'):
         if message:
