@@ -10,4 +10,4 @@ The green icon ![icon-plus-circle](../media/icon-plus-circle.png) indicates the 
 Once clicked the icon will turn to a spinning ![icon-rotate](../media/icon-rotate.png) icon. When finished the rotating icon converts back to either the plus or minus.
 
 ## Createdist command
-While the dashboard installation should be sufficient for most use cases, there may be instances where the `createdist` command needs to be executed manually. The primary case for to is when the installation fails and the output of the command needs to be reviewed. In such a case, please review the README [Custom Commands](../README.md#custom-commands) sections.
+While the dashboard installation should be sufficient for most use cases, there may be instances where the `createdist` command needs to be executed manually. The primary case for to is when the installation fails and the output of the command needs to be reviewed. In such a case, please review the README [Custom Commands](../../README.md#custom-commands) sections.
