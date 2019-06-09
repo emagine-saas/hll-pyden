@@ -47,8 +47,6 @@ def build_dist(version, download):
     if version in config.sections():
         Intersplunk.generateErrorResults("Version already exists.")
         sys.exit(1)
-    sys.stdout.write("messages\n")
-    sys.stdout.flush()
     build_path = os.path.join(os.getcwd(), 'build')
     if not os.path.isdir(build_path):
         os.mkdir(build_path)
@@ -84,7 +82,14 @@ def build_dist(version, download):
                                   sessionKey=session_key)[1]
     optimize = '--enable-optimizations' if optimize_conf in ['true', 'True', '1'] else ''
     logger.debug("Configuring source")
-    configure = subprocess.Popen([os.path.join(os.curdir, 'configure'), optimize, '--with-ensurepip=install', '--prefix={0}'.format(pyden_prefix)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    configure = subprocess.Popen([os.path.join(os.curdir, 'configure'),
+                                  optimize,
+                                  '--with-ensurepip=install',
+                                  '--prefix={0}'.format(pyden_prefix)],
+                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                 universal_newlines=True)
+    if configure.returncode != 0:
+        sys.exit(1)
     result, error = configure.communicate()
     for message in result.split('\n'):
         if message:
@@ -93,7 +98,9 @@ def build_dist(version, download):
         if message:
             logger.error(message)
     logger.debug("Making")
-    make = subprocess.Popen(['make'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    make = subprocess.Popen(['make'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+    if make.returncode != 0:
+        sys.exit(1)
     result, error = make.communicate()
     for message in result.split('\n'):
         if message:
@@ -102,7 +109,10 @@ def build_dist(version, download):
         if message:
             logger.error(message)
     logger.debug("Make install")
-    install = subprocess.Popen(['make', 'altinstall'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    install = subprocess.Popen(['make', 'altinstall'], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                               universal_newlines=True)
+    if install.returncode != 0:
+        sys.exit(1)
     result, error = install.communicate()
     for message in result.split('\n'):
         if message:
@@ -125,8 +135,24 @@ def build_dist(version, download):
 
     # Running get-pip and others
     logger.debug("Upgrading pip")
-    call([py_exec, '-m', 'pip', 'install', '--upgrade', 'pip'])
-    call([py_exec, '-m', 'pip', 'install', 'virtualenv'])
+    pip = subprocess.Popen([py_exec, '-m', 'pip', 'install', '--upgrade', 'pip'], stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE, universal_newlines=True)
+    result, error = pip.communicate()
+    for message in result.split('\n'):
+        if message:
+            logger.info(message)
+    for message in error.split('\n'):
+        if message:
+            logger.error(message)
+    pip = subprocess.Popen([py_exec, '-m', 'pip', 'install', 'virtualenv'], stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE, universal_newlines=True)
+    result, error = pip.communicate()
+    for message in result.split('\n'):
+        if message:
+            logger.info(message)
+    for message in error.split('\n'):
+        if message:
+            logger.error(message)
     logger.info("Finished building Python %s. Distribution available at %s." % (version, pyden_prefix))
 
     write_pyden_config(pyden_location, config, version, "executable", py_exec.lstrip(os.environ['SPLUNK_HOME']))

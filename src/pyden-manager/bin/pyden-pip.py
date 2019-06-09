@@ -1,5 +1,6 @@
 import sys
 import subprocess
+from splunk_logger import setup_logging
 from utils import load_pyden_config
 import os
 if sys.version > '3':
@@ -19,6 +20,7 @@ def activate():
 
 
 if __name__ == "__main__":
+    logger = setup_logging()
     pyden_location, config = load_pyden_config()
     env = False
     pip_arg_index = 1
@@ -35,4 +37,14 @@ if __name__ == "__main__":
     activate()
     sys.stdout.write("messages\n")
     sys.stdout.flush()
-    subprocess.call([py_exec, '-m', 'pip'] + sys.argv[pip_arg_index:-1])
+    pip = subprocess.Popen([py_exec, '-m', 'pip'] + sys.argv[pip_arg_index:-1], stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE, universal_newlines=True)
+    result, error = pip.communicate()
+    for message in result.split('\n'):
+        if message:
+            logger.info(message)
+    for message in error.split('\n'):
+        if message:
+            logger.error(message)
+    if pip.returncode != 0:
+        sys.exit(1)

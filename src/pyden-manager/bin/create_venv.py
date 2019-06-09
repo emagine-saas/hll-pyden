@@ -56,9 +56,17 @@ if __name__ == "__main__":
     if not os.path.isdir(venv_dir):
         os.makedirs(venv_dir)
     os.chdir(venv_dir)
-    sys.stdout.write("messages\n")
-    sys.stdout.flush()
-    subprocess.call([py_exec, '-m', "virtualenv", name])
+    venv = subprocess.Popen([py_exec, '-m', "virtualenv", name], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                            universal_newlines=True)
+    result, error = venv.communicate()
+    for message in result.split('\n'):
+        if message:
+            logger.info(message)
+    for message in error.split('\n'):
+        if message:
+            logger.error(message)
+    if venv.returncode != 0:
+        sys.exit(1)
     venv_exec = os.path.join(venv_dir, name, 'bin', 'python')
     write_pyden_config(pyden_location, config, name, "executable", venv_exec.lstrip(os.environ['SPLUNK_HOME']))
     write_pyden_config(pyden_location, config, name, 'version', version)
