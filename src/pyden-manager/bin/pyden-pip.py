@@ -1,7 +1,7 @@
 import sys
 import subprocess
 from splunk_logger import setup_logging
-from utils import load_pyden_config
+from utils import load_pyden_config, get_proxies
 import os
 if sys.version > '3':
     from importlib import reload
@@ -14,14 +14,26 @@ def activate():
         return
 
     sys.argv.append("reloaded")
+    from splunk import Intersplunk
+    settings = dict()
+    Intersplunk.readResults(settings=settings)
+    session_key = settings['sessionKey']
+    proxies = get_proxies(session_key)
     bin_dir = os.path.dirname(py_exec)
     path = bin_dir + os.pathsep + os.environ["PATH"]
-    os.execve(py_exec, ['python'] + sys.argv, {"PATH": path, "SPLUNK_HOME": os.environ['SPLUNK_HOME']})
+    passed_envs = {
+        "PATH": path,
+        "SPLUNK_HOME": os.environ['SPLUNK_HOME'],
+        'HTTP_PROXY': proxies['http'],
+        'HTTPS_PROXY': proxies['https']
+    }
+    os.execve(py_exec, ['python'] + sys.argv, passed_envs)
 
 
 if __name__ == "__main__":
     logger = setup_logging()
-    pyden_location, config = load_pyden_config()
+    pm_config, config = load_pyden_config()
+    pyden_location = pm_config.get('appsettings', 'location')
     env = False
     pip_arg_index = 1
     if config.has_option('default-pys', 'environment'):

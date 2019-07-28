@@ -5,7 +5,8 @@ from utils import load_pyden_config, write_pyden_config
 
 
 def main(dist, env):
-    pyden_location, config = load_pyden_config()
+    pm_config, config = load_pyden_config()
+    pyden_location = pm_config.get('appsettings', 'location')
     if dist:
         if dist in config.sections():
             write_pyden_config(pyden_location, config, "default-pys", "distribution", dist)

@@ -6,7 +6,8 @@ from splunk_logger import setup_logging
 
 if __name__ == "__main__":
     logger = setup_logging()
-    pyden_location, config = load_pyden_config()
+    pm_config, config = load_pyden_config()
+    pyden_location = pm_config.get('appsettings', 'location')
     sections = config.sections()
     logger.debug(sections)
     if "default-pys" in sections:

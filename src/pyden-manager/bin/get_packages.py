@@ -2,6 +2,7 @@ import sys
 import requests
 from HTMLParser import HTMLParser
 from splunk import Intersplunk
+from utils import get_proxies
 
 
 class PyPIHTMLParser(HTMLParser):
@@ -27,18 +28,23 @@ class PyPIHTMLParser(HTMLParser):
 
 def get_simple_index():
     parser = PyPIHTMLParser()
-    r = requests.get("https://pypi.org/simple/")
+
+    r = requests.get("https://pypi.org/simple/", proxies=proxies)
     parser.feed(r.text)
     return [{'package': package} for package in parser.packages]
 
 
 def get_package_description(package):
-    r = requests.get("https://pypi.python.org/pypi/%s/json" % package)
+    r = requests.get("https://pypi.python.org/pypi/%s/json" % package, proxies=proxies)
 
     return [{"description": r.json()['info']['description']}]
 
 
 if __name__ == "__main__":
+    settings = dict()
+    Intersplunk.readResults(settings=settings)
+    session_key = settings['sessionKey']
+    proxies = get_proxies(session_key)
     if sys.argv[1] == "pypi_simple_index":
         results = get_simple_index()
     else:

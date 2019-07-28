@@ -5,7 +5,8 @@ import shutil
 
 
 if __name__ == "__main__":
-    pyden_location, config = load_pyden_config()
+    pm_config, config = load_pyden_config()
+    pyden_location = pm_config.get('appsettings', 'location')
     local_conf = os.path.join(pyden_location, 'local', 'pyden.conf')
     local_dir = os.path.dirname(local_conf)
     name = sys.argv[1]

@@ -9,21 +9,21 @@ import requests
 import re
 from splunk_logger import setup_logging
 import shutil
-from utils import load_pyden_config, write_pyden_config
+from utils import load_pyden_config, write_pyden_config, get_proxies
 
 
 def download_python(version, build_path):
     base_url = simpleRequest("/servicesNS/nobody/pyden-manager/properties/pyden/download/url",
                              sessionKey=session_key)[1]
     try:
-        dpr = requests.get(base_url + "{0}/".format(version))
+        dpr = requests.get(base_url + "{0}/".format(version), proxies=proxies)
     except Exception as ex:
         Intersplunk.generateErrorResults("Exception thrown getting python: ({0}, {1})".format(type(ex), ex))
         sys.exit(1)
     else:
         if dpr.status_code in range(200, 300):
             python_link = [link for link in re.findall("href=\"(.*?)\"", dpr.content) if link.endswith('tgz')][0]
-            dpr = requests.get(base_url + "{0}/{1}".format(version, python_link))
+            dpr = requests.get(base_url + "{0}/{1}".format(version, python_link), proxies=proxies)
         else:
             Intersplunk.generateErrorResults(
                 "Failed to reach www.python.org. Request returned - Status code: {0}, Response: {1}".format(
@@ -43,7 +43,8 @@ def download_python(version, build_path):
 
 
 def build_dist(version, download):
-    pyden_location, config = load_pyden_config()
+    pm_config, config = load_pyden_config()
+    pyden_location = pm_config.get('appsettings', 'location')
     if version in config.sections():
         Intersplunk.generateErrorResults("Version already exists.")
         sys.exit(1)
@@ -78,7 +79,7 @@ def build_dist(version, download):
     if not os.path.isdir(pyden_prefix):
         os.makedirs(pyden_prefix)
     os.chdir(os.path.join(os.getcwd(), extracted_member))
-    optimize_conf = simpleRequest("/servicesNS/nobody/pyden-manager/properties/pyden/app/optimize",
+    optimize_conf = simpleRequest("/servicesNS/nobody/pyden-manager/properties/pyden/appsettings/optimize",
                                   sessionKey=session_key)[1]
     optimize = '--enable-optimizations' if optimize_conf in ['true', 'True', '1'] else ''
     # remove environment variables. needed to use host libraries instead of splunk's built-in.
@@ -140,6 +141,8 @@ def build_dist(version, download):
 
     # Running get-pip and others
     logger.debug("Upgrading pip")
+    os.environ['HTTP_PROXY'] = proxies['http']
+    os.environ['HTTPS_PROXY'] = proxies['https']
     pip = subprocess.Popen([py_exec, '-m', 'pip', 'install', '--upgrade', 'pip'], stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE, universal_newlines=True, env=os.environ)
     result, error = pip.communicate()
@@ -175,6 +178,7 @@ if __name__ == "__main__":
     else:
         Intersplunk.readResults(settings=settings)
         session_key = settings['sessionKey']
+    proxies = get_proxies(session_key)
     latest_python_search = r"""
     | getversions 
     | rex field=version "(?<v_M>\d+)\.(?<v_m>\d+)\.(?<v_mm>\d+)" 

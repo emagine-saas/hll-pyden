@@ -1,2 +1,0 @@
-This is where python distributions will be built. If not using the online download option, archives (tgz) of Python
-source should be placed here before using the "createdist" command.

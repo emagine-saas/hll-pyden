@@ -16,11 +16,12 @@ def load_pyden_config():
     proc_out, proc_err = proc.communicate()
     buf = StringIO(proc_out.decode())
     pm_config.readfp(buf)
-    pyden_location = pm_config.get('app', 'location')
+
+    pyden_location = pm_config.get('appsettings', 'location')
     local_conf = os.path.abspath(os.path.join(pyden_location, 'local', 'pyden.conf'))
     config = ConfigParser()
     config.read([local_conf])
-    return pyden_location, config
+    return pm_config, config
 
 
 def write_pyden_config(pyden_location, config, stanza, attribute, value):
@@ -33,3 +34,26 @@ def write_pyden_config(pyden_location, config, stanza, attribute, value):
     config.set(stanza, attribute, value)
     with open(local_conf, 'w') as f:
         config.write(f)
+
+
+def get_proxies(session_key):
+    import splunk.entity as entity
+    myapp = 'pyden-manager'
+    user = ""
+    password = ""
+    try:
+        entities = entity.getEntities(['admin', 'passwords'], namespace=myapp, owner='nobody', sessionKey=session_key)
+    except Exception as e:
+        raise Exception("Could not get %s credentials from splunk. Error: %s" % (myapp, str(e)))
+
+    for i, c in entities.items():
+        user, password = c['username'], c['clear_password']
+
+    auth = "%s:%s@" % (user, password) if user else ""
+    proxy = load_pyden_config()[0].get('appsettings', 'proxy')
+
+    proxies = {
+        "http": "http://%s%s/" % (auth, proxy),
+        "https": "https://%s%s/" % (auth, proxy)
+    } if proxy else {}
+    return proxies

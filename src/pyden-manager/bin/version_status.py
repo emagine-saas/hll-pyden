@@ -22,7 +22,7 @@ def main():
     local_conf = os.path.abspath(os.path.join(os.pardir, 'local', 'pyden.conf'))
     config = ConfigParser()
     config.read([default_conf, local_conf])
-    pyden_location = config.get('app', 'location')
+    pyden_location = config.get('appsettings', 'location')
     pyden_config = ConfigParser()
     pyden_local_conf = os.path.abspath(os.path.join(pyden_location, 'local', 'pyden.conf'))
     pyden_config.read([pyden_local_conf])
