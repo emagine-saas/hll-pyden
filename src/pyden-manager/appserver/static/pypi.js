@@ -21,6 +21,7 @@ require([
             var tokenset = mvc.Components.get("default");
             var pypiPackage = cell.value;
             var search = `| getpackages ${pypiPackage}`;
+            var searchUrl = location.origin + "/en-US/splunkd/__raw/servicesNS/nobody/pyden-manager/search/jobs";
             $td.html(pypiPackage);
             var submitButton = '<div id="submit" class="splunk-submit-button form-submit dashboard-form-submit"><button class="btn btn-primary">Install</button></div>';
             var rotate_icon = '<div id="rotate_icon" class="splunk-submit-button form-submit dashboard-form-submit icon"><i class="icon-rotate blue spin"></i></div>';
@@ -39,27 +40,44 @@ require([
                     var md = data.results[0].description;
                     var tokens = marked.lexer(md);
                     desc.el.innerHTML = marked.parser(tokens);
-                    var submit = $('#submit');
-                    submit.on("click", function (e) {
-                        submit.after(rotate_icon);
+
+                    tokenset.on("change:environment", function () {
                         var environment = tokenset.get("environment");
-                        $.post(location.origin + "/en-US/splunkd/__raw/servicesNS/nobody/pyden-manager/search/jobs", {
+                        var submit = $('#submit');
+                        $.post(searchUrl, {
                             'exec_mode': 'oneshot',
                             'output_mode': 'json',
-                            'search': `| pip environment=${environment} install ${pypiPackage}`
+                            'search': `| pip environment=${environment} freeze | eval package=mvindex(split(messages, "=="), 0) | search package=${pypiPackage}`
                         }, function (data) {
-                            $('#rotate_icon').remove();
-                            console.log(data);
-                            if (data.messages.length > 0 && data.messages[0].type === "ERROR") {
-                                submit.after(error_icon);
+                            console.log(data.results.length);
+                            if (data.results.length > 0) {
+                                submit.find('button').prop('disabled', true);
+                                submit.on("click", function (e) {
+                                    $('#done_icon').remove();
+                                    submit.after(rotate_icon);
+                                    $.post(searchUrl, {
+                                        'exec_mode': 'oneshot',
+                                        'output_mode': 'json',
+                                        'search': `| pip environment=${environment} install ${pypiPackage}`
+                                    }, function (data) {
+                                        $('#rotate_icon').remove();
+                                        if (data.messages.length > 0 && data.messages[0].type === "ERROR") {
+                                            submit.after(error_icon);
+                                        } else {
+                                            submit.after(done_icon);
+                                        }
+                                    }).fail(function(){
+                                        $('#rotate_icon').remove();
+                                        submit.after(error_icon);
+                                    })
+                                })
                             } else {
-                                submit.after(done_icon);
+                                submit.find('button').prop('disabled', false);
                             }
-                        }).fail(function(){
-                            $('#rotate_icon').remove();
-                            submit.after(error_icon);
-                        })
-                    })
+                        });
+
+                    });
+
                 })
             });
         }
