@@ -28,7 +28,7 @@ if __name__ == "__main__":
         r = requests.get(url, headers={'Cache-Control': 'no-cache'}, proxies=proxies)
         source_pattern = r"""<a href=\"(?P<link>.*)\">Python-%s.tgz""" % version.replace('.', '\\.')
         # logger.debug(source_pattern)
-        logger.debug(r.text)
+        # logger.debug(r.text)
         match = re.findall(source_pattern, r.text)
         # logger.debug(match)
         if not match:

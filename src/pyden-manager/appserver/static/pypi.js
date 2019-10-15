@@ -52,6 +52,9 @@ require([
                             console.log(data.results.length);
                             if (data.results.length > 0) {
                                 submit.find('button').prop('disabled', true);
+                            } else {
+                                console.log("Attempting to install " + pypiPackage);
+                                submit.find('button').prop('disabled', false);
                                 submit.on("click", function (e) {
                                     $('#done_icon').remove();
                                     submit.after(rotate_icon);
@@ -71,8 +74,6 @@ require([
                                         submit.after(error_icon);
                                     })
                                 })
-                            } else {
-                                submit.find('button').prop('disabled', false);
                             }
                         });
 

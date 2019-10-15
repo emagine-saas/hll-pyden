@@ -19,8 +19,13 @@ def validate_arguments():
 # Routine to index data
 def run_script():
     index_time = "[" + time.strftime("%m/%d/%Y %H:%M:%S %p %Z", time.localtime()) + "]"
-    print("{} Script run on {} using {} with {} at {}".format(index_time, socket.gethostname(), sys.executable,
-                                                              sys.version, os.getcwd()))
+    try:
+        import splunklib
+    except ImportError:
+        found_sdk = "false"
+    else:
+        found_sdk = "true"
+    print("{} host:{} executable:{} version:{} cwd:{} foundSDK: {}".format(index_time, socket.gethostname(), sys.executable, sys.version, os.getcwd(), found_sdk))
 
 
 # Script must implement these args: scheme, validate-arguments

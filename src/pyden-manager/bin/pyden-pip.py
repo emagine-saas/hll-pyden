@@ -23,10 +23,11 @@ def activate():
     path = bin_dir + os.pathsep + os.environ["PATH"]
     passed_envs = {
         "PATH": path,
-        "SPLUNK_HOME": os.environ['SPLUNK_HOME'],
-        'HTTP_PROXY': proxies['http'],
-        'HTTPS_PROXY': proxies['https']
+        "SPLUNK_HOME": os.environ['SPLUNK_HOME']
     }
+    if proxies:
+        passed_envs['HTTP_PROXY'] = proxies['http']
+        passed_envs['HTTPS_PROXY'] = proxies['https']
     os.execve(py_exec, ['python'] + sys.argv, passed_envs)
 
 

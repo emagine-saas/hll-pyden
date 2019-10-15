@@ -50,8 +50,13 @@ for line in csvr:
     results.append(result)
 
 for result in results:
-    result["message"] = "Script run on {} using {} with {} at {}".format(socket.gethostname(), sys.executable,
-                                                                         sys.version, os.getcwd())
+    result["message"] = "host:{} executable:{} version:{} cwd:{}".format(socket.gethostname(), sys.executable, sys.version, os.getcwd())
+    try:
+        import splunklib
+    except ImportError:
+        result["foundSDK"] = "false"
+    else:
+        result["foundSDK"] = "true"
 
 outputfile = sys.stdout
 s = set()

@@ -81,7 +81,7 @@ def build_dist(version, download):
     os.chdir(os.path.join(os.getcwd(), extracted_member))
     optimize_conf = simpleRequest("/servicesNS/nobody/pyden-manager/properties/pyden/appsettings/optimize",
                                   sessionKey=session_key)[1]
-    optimize = '--enable-optimizations' if optimize_conf in ['true', 'True', '1'] else ''
+    optimize = '--enable-optimizations' if optimize_conf in ['true', 'True', '1', 1] else ''
     # remove environment variables. needed to use host libraries instead of splunk's built-in.
     del os.environ['LD_LIBRARY_PATH']
     del os.environ['OPENSSL_CONF']
@@ -103,7 +103,7 @@ def build_dist(version, download):
     if configure.returncode != 0:
         sys.exit(1)
     logger.debug("Making")
-    make = subprocess.Popen(['make'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True,
+    make = subprocess.Popen(['make', '-j', '8'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True,
                             env=os.environ)
     result, error = make.communicate()
     for message in result.split('\n'):
@@ -141,10 +141,10 @@ def build_dist(version, download):
 
     # Running get-pip and others
     logger.debug("Upgrading pip")
-    os.environ['HTTP_PROXY'] = proxies['http']
-    os.environ['HTTPS_PROXY'] = proxies['https']
-    pip = subprocess.Popen([py_exec, '-m', 'pip', 'install', '--upgrade', 'pip'], stdout=subprocess.PIPE,
-                           stderr=subprocess.PIPE, universal_newlines=True, env=os.environ)
+    if proxies:
+        os.environ['HTTP_PROXY'] = proxies['http']
+        os.environ['HTTPS_PROXY'] = proxies['https']
+    pip = subprocess.Popen([py_exec, '-m', 'pip', 'install', '--upgrade', 'pip'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, env=os.environ)
     result, error = pip.communicate()
     for message in result.split('\n'):
         if message:

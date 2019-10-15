@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 
+set -x
+
+wget -q -O splunk.deb 'https://www.splunk.com/bin/splunk/DownloadActivityServlet?architecture=x86_64&platform=linux&version=7.3.2&product=splunk&filename=splunk-7.3.2-c60db69f8e32-linux-2.6-amd64.deb&wget=true'
+sudo dpkg -i splunk.deb
+
 sudo timedatectl set-timezone America/New_York
 sudo -u splunk cp /home/vagrant/.bashrc ${SPLUNK_HOME}/.bashrc
 sudo -u splunk cp /home/vagrant/.profile ${SPLUNK_HOME}/.profile
 echo "alias splunk=${SPLUNK_BIN}" | sudo tee -a ${SPLUNK_HOME}/.bashrc > /dev/null
 echo "splunk:${SPLUNK_PASS}" | sudo chpasswd
-sudo DEBIAN_FRONTEND=noninteractive apt-get update -yq
-sudo DEBIAN_FRONTEND=noninteractive apt-get install -yq sshpass build-essential libffi-dev libssl-dev
-# sudo apt-get install -yq sshpass build-essential libncurses5-dev libgdbm-dev libdb5.3-dev libbz2-dev liblzma-dev libsqlite3-dev libffi-dev tcl-dev tk tk-dev libdb-dev libexpat-dev libpcap-dev libpcre3-dev
+sudo apt-get install -yq sshpass build-essential libffi-dev libssl-dev
 cat << EOF | sudo -u splunk tee -a ${SPLUNK_HOME}/etc/system/local/user-seed.conf
 [user_info]
 USERNAME = admin
