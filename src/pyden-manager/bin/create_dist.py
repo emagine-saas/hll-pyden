@@ -85,7 +85,8 @@ def build_dist(version, download):
     # remove environment variables. needed to use host libraries instead of splunk's built-in.
     del os.environ['LD_LIBRARY_PATH']
     del os.environ['OPENSSL_CONF']
-    del os.environ['PYTHONPATH']
+    if 'PYTHONPATH' in os.environ:
+        del os.environ['PYTHONPATH']
     logger.debug("Configuring source")
     configure = subprocess.Popen([os.path.join(os.curdir, 'configure'),
                                   optimize,
