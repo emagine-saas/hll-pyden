@@ -8,8 +8,18 @@ if sys.version < '3':
 else:
     from importlib import reload
 
+if sys.argv[-1].startswith("conf="):
+    confFile= sys.argv[-1].replace("conf=", "")
+	
 
-def activate():
+# The pyden-env will need to define:
+#    * PYTHONPATH to be able to exec splunk responses; needs to hold the dir for local pyden installed libraries and splunk site-packages, with correct version of python
+#          os.path.dirname(os.path.dirname(__file__))+ os.sep+ str(os.sep).join(["local", "lib", "venv","timesuite", "lib", "python3.7", "site-packages"])+os.pathsep +
+## Python version is locked here, as we have just installed it, ourselves.  Likewise the venv as installed by us, now.
+#          os.environ['SPLUNK_HOME']+os.sep+"lib"+os.sep+"python3.7"+os.sep+ "site-packages" +os.sep
+#    * SPLUNK_HOME to do normal stuff
+#
+def activate(py_exec):
     if sys.argv[-1] == "reloaded":
         reload(os)
         reload(sys)
@@ -17,8 +27,20 @@ def activate():
 
     sys.argv.append("reloaded")
     bin_dir = os.path.dirname(py_exec)
+
+    if confFile and os.path.isfile( confFile):
+        cc = ConfigParser()
+        cc.read(confFile) 
+        if 'pyden_env' in cc:
+            forkEnv=cc['pyden_env']
+    else:
+        forkEnv={}
+    base = os.path.dirname(py_exec)
+    forkEnv['PATH'] = base + os.pathsep + os.environ["PATH"]
+    forkEnv['PYDEN_CONFIG']=proc_out
+
     path = bin_dir + os.pathsep + os.environ["PATH"]
-    os.execve(py_exec, ['python'] + sys.argv, {"PATH": path, "SPLUNK_HOME": os.environ['SPLUNK_HOME']})
+    os.execve(py_exec, ['python'] + sys.argv, forkEnv)
 
 
 if __name__ == "__main__":
@@ -46,7 +68,7 @@ if __name__ == "__main__":
     name = args['name']
     if version in config.sections():
         py_exec = os.path.join(os.environ['SPLUNK_HOME'], config.get(version, 'executable'))
-        activate()
+        activate(py_exec)
     else:
         logger.error("Python version not found in pyden.conf.")
         sys.exit(1)
@@ -71,3 +93,4 @@ if __name__ == "__main__":
     venv_exec = os.path.join(venv_dir, name, 'bin', 'python')
     write_pyden_config(pyden_location, config, name, "executable", venv_exec.lstrip(os.environ['SPLUNK_HOME']))
     write_pyden_config(pyden_location, config, name, 'version', version)
+
