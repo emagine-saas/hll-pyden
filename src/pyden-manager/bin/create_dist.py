@@ -16,29 +16,38 @@ def download_python(version, build_path):
     base_url = simpleRequest("/servicesNS/nobody/pyden-manager/properties/pyden/download/url",
                              sessionKey=session_key)[1]
     try:
-        dpr = requests.get(base_url + "{0}/".format(version), proxies=proxies)
+        base_url=str(base_url, 'utf-8')
+        dpr = requests.get(base_url + "{0}/".format(str(version)), proxies=proxies)
     except Exception as ex:
         Intersplunk.generateErrorResults("Exception thrown getting python: ({0}, {1})".format(type(ex), ex))
-        sys.exit(1)
+        sys.exit(3)
     else:
         if dpr.status_code in range(200, 300):
-            python_link = [link for link in re.findall("href=\"(.*?)\"", dpr.content) if link.endswith('tgz')][0]
+
+            tt=str(dpr.content, 'utf-8')
+            tt=re.findall("href=\"(.*?)\"", tt)
+				# statements split up so I could check types
+            python_link=False
+            for python_link in tt:
+                if python_link.endswith('tgz'):
+                    break
+#            python_link = [link for link in re.findall("href=\"(.*?)\"", dpr.content) if link.endswith('tgz')][0]
             dpr = requests.get(base_url + "{0}/{1}".format(version, python_link), proxies=proxies)
         else:
             Intersplunk.generateErrorResults(
                 "Failed to reach www.python.org. Request returned - Status code: {0}, Response: {1}".format(
-                    dpr.status_code, dpr.text))
-            sys.exit(1)
+                   str(dpr.status_code, 'utf-8'), str(dpr.text, 'utf-8')))
+            sys.exit(4)
     if dpr.status_code in range(200, 300):
         # save
-        build_file = os.path.join(build_path, "Python-{0}.tgz".format(version))
-        with open(build_file, "w") as download:
+        build_file = os.path.join(build_path, "Python-{0}.tgz".format(str(version)))
+        with open(build_file, "wb") as download:
             download.write(dpr.content)
     else:
         Intersplunk.generateErrorResults(
-            "Failed to download python. Request returned - Status code: {0}, Response: {1}".format(dpr.status_code,
-                                                                                                   dpr.text))
-        sys.exit(1)
+            "Failed to download python. Request returned - Status code: {0}, Response: {1}".format(str(dpr.status_code),
+                                              str(dpr.text)))
+        sys.exit(5)
     return build_file
 
 
@@ -47,7 +56,7 @@ def build_dist(version, download):
     pyden_location = pm_config.get('appsettings', 'location')
     if version in config.sections():
         Intersplunk.generateErrorResults("Version already exists.")
-        sys.exit(1)
+        sys.exit(6)
     build_path = os.path.join(os.getcwd(), 'build')
     if not os.path.isdir(build_path):
         os.mkdir(build_path)
@@ -72,7 +81,7 @@ def build_dist(version, download):
         extracted_member = extracted_members[0]
     else:
         Intersplunk.generateErrorResults("Archive contained more than one item. Please use archive with single member.")
-        sys.exit(1)
+        sys.exit(7)
 
     # configure and build
     pyden_prefix = os.path.join(pyden_location, 'local', 'lib', 'dist', version)
@@ -102,7 +111,7 @@ def build_dist(version, download):
         if message:
             logger.error(message)
     if configure.returncode != 0:
-        sys.exit(1)
+        sys.exit(8)
     logger.debug("Making")
     make = subprocess.Popen(['make', '-j', '8'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True,
                             env=os.environ)
@@ -114,7 +123,7 @@ def build_dist(version, download):
         if message:
             logger.error(message)
     if make.returncode != 0:
-        sys.exit(1)
+        sys.exit(9)
     logger.debug("Make install")
     install = subprocess.Popen(['make', 'altinstall'], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                universal_newlines=True, env=os.environ)
@@ -126,8 +135,8 @@ def build_dist(version, download):
         if message:
             logger.error(message)
     if install.returncode != 0:
-        sys.exit(1)
-    logger.debug("Determining binary of %s" % pyden_prefix)
+        sys.exit(10)
+    logger.debug("Determining binary of " + str(pyden_prefix))
     bin_dir = os.path.join(pyden_prefix, 'bin')
     os.chdir(bin_dir)
     largest_size = 0
@@ -138,7 +147,7 @@ def build_dist(version, download):
         if bin_size > largest_size:
             py_exec = os.path.join(bin_dir, binary)
             largest_size = bin_size
-    logger.debug("Found binary: %s" % py_exec)
+    logger.debug("Found binary: "+str( py_exec))
 
     # Running get-pip and others
     logger.debug("Upgrading pip")
@@ -162,7 +171,7 @@ def build_dist(version, download):
     for message in error.split('\n'):
         if message:
             logger.error(message)
-    logger.info("Finished building Python %s. Distribution available at %s." % (version, pyden_prefix))
+    logger.info("Finished building Python {}. Distribution available at {}.".format(version, pyden_prefix))
 
     write_pyden_config(pyden_location, config, version, "executable", py_exec.lstrip(os.environ['SPLUNK_HOME']))
     if not config.has_section("default-pys") or not config.has_option("default-pys", "distribution"):
@@ -194,12 +203,13 @@ if __name__ == "__main__":
                           sessionKey=session_key)
         dist_version = json.loads(r[1])['results'][0]['version']
     except Exception as e:
-        Intersplunk.generateErrorResults("Failed to find latest version of Python: %s." % e)
-        sys.exit(1)
+
+        Intersplunk.generateErrorResults("Failed to find latest version of Python: " +str( e))
+        sys.exit(2)
     for arg in sys.argv:
         if "version" in arg:
-            dist_version = arg.split("=")[1]
+            dist_version = str(arg.split("=")[1])
         if "download" in arg:
-            download_arg = arg.split("=")[1]
-    logger.info("Creating Python distribution version %s" % dist_version)
+            download_arg = str(arg.split("=")[1])
+    logger.info("Creating Python distribution version" +str( dist_version))
     build_dist(dist_version, download_arg)
