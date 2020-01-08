@@ -1,13 +1,16 @@
 import sys
 import subprocess
 from splunk_logger import setup_logging
-from utils import load_pyden_config, get_proxies
+from utils import load_pyden_config, get_proxies, pyden_env
 import os
 if sys.version > '3':
     from importlib import reload
 
+confFile=False
+if sys.argv[-1].startswith("conf="):
+    confFile= sys.argv[-1].replace("conf=", "")
 
-def activate():
+def activate(py_exec):
     if sys.argv[-1] == "reloaded":
         reload(os)
         reload(sys)
@@ -18,17 +21,13 @@ def activate():
     settings = dict()
     Intersplunk.readResults(settings=settings)
     session_key = settings['sessionKey']
+
     proxies = get_proxies(session_key)
-    bin_dir = os.path.dirname(py_exec)
-    path = bin_dir + os.pathsep + os.environ["PATH"]
-    passed_envs = {
-        "PATH": path,
-        "SPLUNK_HOME": os.environ['SPLUNK_HOME']
-    }
+    forkEnv=pyden_env(confFile, py_exec, "" )
     if proxies:
-        passed_envs['HTTP_PROXY'] = proxies['http']
-        passed_envs['HTTPS_PROXY'] = proxies['https']
-    os.execve(py_exec, ['python'] + sys.argv, passed_envs)
+        forkEnv['HTTP_PROXY'] = proxies['http']
+        forkEnv['HTTPS_PROXY'] = proxies['https']
+    os.execve(py_exec, ['python'] + sys.argv, forkEnv)
 
 
 if __name__ == "__main__":
@@ -47,7 +46,7 @@ if __name__ == "__main__":
     if not env:
         sys.exit(1)
     py_exec = os.path.join(os.environ['SPLUNK_HOME'], config.get(env, 'executable'))
-    activate()
+    activate(py_exec)
     sys.stdout.write("messages\n")
     sys.stdout.flush()
     pip = subprocess.call([py_exec, '-m', 'pip'] + sys.argv[pip_arg_index:-1])

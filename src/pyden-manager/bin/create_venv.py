@@ -2,12 +2,13 @@ import sys
 import os
 import subprocess
 from splunk_logger import setup_logging
-from utils import load_pyden_config, write_pyden_config
+from utils import load_pyden_config, write_pyden_config, pyden_conf
 if sys.version < '3':
     pass
 else:
     from importlib import reload
 
+confFile=False
 if sys.argv[-1].startswith("conf="):
     confFile= sys.argv[-1].replace("conf=", "")
 	
@@ -26,22 +27,8 @@ def activate(py_exec):
         return
 
     sys.argv.append("reloaded")
-    bin_dir = os.path.dirname(py_exec)
-
-    if confFile and os.path.isfile( confFile):
-        cc = ConfigParser()
-        cc.read(confFile) 
-        if 'pyden_env' in cc:
-            forkEnv=cc['pyden_env']
-    else:
-        forkEnv={}
-    base = os.path.dirname(py_exec)
-    forkEnv['PATH'] = base + os.pathsep + os.environ["PATH"]
-    forkEnv['PYDEN_CONFIG']=proc_out
-
-    path = bin_dir + os.pathsep + os.environ["PATH"]
+    forkEnv=pyden_env(confFile, py_exec, proc_out )
     os.execve(py_exec, ['python'] + sys.argv, forkEnv)
-
 
 if __name__ == "__main__":
     logger = setup_logging()

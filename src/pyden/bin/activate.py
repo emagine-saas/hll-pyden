@@ -43,21 +43,8 @@ def activate_venv(env, confFile):
         reload(os)
         reload(sys)
         return
-
-    if confFile and os.path.isfile( confFile):
-        cc = ConfigParser()
-        cc.read(confFile) 
-        if 'pyden_env' in cc:
-            forkEnv=cc['pyden_env']
-
-    else:
-        forkEnv={}
-    base = os.path.dirname(py_exec)
-    forkEnv['PATH'] = base + os.pathsep + os.environ["PATH"]
-    forkEnv['PYDEN_CONFIG']=proc_out
-
+    forkEnv=pyden_env(confFile, py_exec, proc_out ) 
     os.execve(py_exec, ['python'] + sys.argv, forkEnv)
-
 
 def activate_venv_or_die(env=False, confFile=False):
     if not env:
@@ -66,4 +53,16 @@ def activate_venv_or_die(env=False, confFile=False):
         activate_venv(env, confFile)
     except ActivationError:
         sys.exit(1)
+
+def pyden_env(confFile, py_exec, pyden):
+    forkEnv={}
+    if confFile and os.path.isfile( confFile):
+        cc = ConfigParser()
+        cc.read(confFile) 
+        if 'pyden_env' in cc:
+            forkEnv=cc['pyden_env']
+    base = os.path.dirname(py_exec)
+    forkEnv['PATH'] = base + os.pathsep + os.environ["PATH"]
+    forkEnv['PYDEN_CONFIG']=pyden
+    return forkEnv
 
