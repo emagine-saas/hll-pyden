@@ -7,7 +7,7 @@ VAGRANTFILE_API_VERSION = "2"
 VM_MEMORY = 4096
 VM_CPUS = 2
 # this is the password you will set for your splunk admin user
-SPLUNK_PASS  = "h0ptroFF1"
+SPLUNK_PASS  = "chAnge_me3" 
 # Splunk home directory
 SPLUNK_HOME  = "/opt/splunk"
 
