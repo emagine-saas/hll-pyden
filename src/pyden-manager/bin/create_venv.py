@@ -2,7 +2,7 @@ import sys
 import os
 import subprocess
 from splunk_logger import setup_logging
-from utils import load_pyden_config, write_pyden_config, pyden_conf
+from utils import load_pyden_config, write_pyden_config, pyden_env
 if sys.version < '3':
     pass
 else:
@@ -11,7 +11,6 @@ else:
 confFile=False
 if sys.argv[-1].startswith("conf="):
     confFile= sys.argv[-1].replace("conf=", "")
-	
 
 # The pyden-env will need to define:
 #    * PYTHONPATH to be able to exec splunk responses; needs to hold the dir for local pyden installed libraries and splunk site-packages, with correct version of python
@@ -25,10 +24,17 @@ def activate(py_exec):
         reload(os)
         reload(sys)
         return
+    pydenFile= getBtoolConfig()
 
     sys.argv.append("reloaded")
-    forkEnv=pyden_env(confFile, py_exec, proc_out )
+    forkEnv=pyden_env(confFile, py_exec, pydenFile )
     os.execve(py_exec, ['python'] + sys.argv, forkEnv)
+
+def getBtoolConfig():
+    splunk_bin = os.path.join(os.environ['SPLUNK_HOME'], 'bin', 'splunk')
+    proc = subprocess.Popen([splunk_bin, 'btool', 'pyden', 'list'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc_out, proc_err = proc.communicate()
+    return proc_out.decode()
 
 if __name__ == "__main__":
     logger = setup_logging()

@@ -5,15 +5,15 @@
 VAGRANTFILE_API_VERSION = "2"
 
 VM_MEMORY = 4096
-VM_CPUS = 4
+VM_CPUS = 2
 # this is the password you will set for your splunk admin user
-SPLUNK_PASS  = "changeme1"
+SPLUNK_PASS  = "h0ptroFF1"
 # Splunk home directory
 SPLUNK_HOME  = "/opt/splunk"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
-    config.vm.box = "bento/ubuntu-19.04"
+    config.vm.box = "centos/7"
     config.vm.define "splunk"
     config.vm.hostname = "splunk"
     config.vm.network "private_network", ip: "192.168.100.10"
