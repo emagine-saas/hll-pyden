@@ -3,9 +3,7 @@ import os
 import subprocess
 from splunk_logger import setup_logging
 from utils import load_pyden_config, write_pyden_config, pyden_env
-if sys.version < '3':
-    pass
-else:
+if sys.version >= '3':
     from importlib import reload
 
 confFile=False

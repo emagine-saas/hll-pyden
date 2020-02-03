@@ -58,11 +58,11 @@ def pyden_env(confFile, py_exec, pyden):
     forkEnv={}
     if confFile and os.path.isfile( confFile):
         cc = ConfigParser()
-        cc.read(confFile) 
-        if 'pyden_env' in cc:
-            forkEnv=cc['pyden_env']
-    base = os.path.dirname(py_exec)
-    forkEnv['PATH'] = base + os.pathsep + os.environ["PATH"]
+        cc.optionxform=str
+        cc.read(confFile)
+        if 'pyden_env' in cc.sections():
+            forkEnv=dict(cc.items('pyden_env'))
+    forkEnv['PATH'] = os.path.dirname(py_exec) + os.pathsep + os.environ["PATH"]
     forkEnv['PYDEN_CONFIG']=pyden
     return forkEnv
 
