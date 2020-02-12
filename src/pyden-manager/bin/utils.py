@@ -1,6 +1,9 @@
 import os
 import subprocess
 import sys
+import logging
+# Log verboseness names are fairly obvious 
+DESIRED_LOG_LEVEL=logging.DEBUG
 from splunk_logger import setup_logging
 if sys.version < '3':
     from ConfigParser import ConfigParser
@@ -9,7 +12,8 @@ else:
     from configparser import ConfigParser
     from io import StringIO
 
-
+# this log object is turned off somewhere
+# also this set of logging is less useful as it doesnt report current state, just that the script got that far
 util_logger = setup_logging()
 
 
@@ -81,3 +85,16 @@ def pyden_env(confFile, py_exec, pyden):
     forkEnv['PYDEN_CONFIG']=pyden
     return forkEnv
 
+def createWorkingLog():
+    LOGFILE = os.sep.join([ os.environ['SPLUNK_HOME'], 'var', 'log', 'splunk', 'hll-setup.log'])
+# https://stackoverflow.com/questions/533048/how-to-log-source-file-name-and-line-number-in-python
+# had to add the process id item, due to all the fork/ exec in pyden
+    FORMAT = "%(asctime)-15s [%(process)d]  %(funcName)s # %(lineno)s %(message)s "
+    l = logging.getLogger("pyden-man")
+    l.setLevel( DESIRED_LOG_LEVEL )
+    ch = logging.FileHandler(LOGFILE )
+    formatter = logging.Formatter(FORMAT )
+    ch.setFormatter(formatter)
+    l.addHandler(ch)
+    return l
+   

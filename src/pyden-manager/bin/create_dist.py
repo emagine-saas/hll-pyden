@@ -7,9 +7,8 @@ from splunk.rest import simpleRequest
 from splunk import Intersplunk
 import requests
 import re
-from splunk_logger import setup_logging
 import shutil
-from utils import load_pyden_config, write_pyden_config, get_proxies
+from utils import load_pyden_config, write_pyden_config, get_proxies, createWorkingLog
 
 
 def download_python(version, build_path):
@@ -38,6 +37,7 @@ def download_python(version, build_path):
                 "Failed to reach www.python.org. Request returned - Status code: {0}, Response: {1}".format(
                    str(dpr.status_code, 'utf-8'), str(dpr.text, 'utf-8')))
             sys.exit(4)
+
     if dpr.status_code in range(200, 300):
         # save
         build_file = os.path.join(build_path, "Python-{0}.tgz".format(str(version)))
@@ -51,20 +51,21 @@ def download_python(version, build_path):
     return build_file
 
 
-def build_dist(version, download):
+def build_dist(version, download, log):
     pm_config, config = load_pyden_config()
     pyden_location = pm_config.get('appsettings', 'location')
     if version in config.sections():
+        log.warning("Requested to install version of python already present "+version)
         Intersplunk.generateErrorResults("Version already exists.")
         sys.exit(6)
     build_path = os.path.join(os.getcwd(), 'build')
     if not os.path.isdir(build_path):
         os.mkdir(build_path)
     if download is True:
-        logger.debug("Downloading Python")
+        log.debug("Downloading Python")
         build_file = download_python(version, build_path)
     else:
-        logger.debug("Using existing archive")
+        log.debug("Using existing source archive"+download)
         build_file = os.path.join(build_path, download)
 
     # unpack
@@ -72,7 +73,7 @@ def build_dist(version, download):
         shutil.rmtree(build_file[:-4], ignore_errors=True)
     os.chdir(build_path)
     list_before_extraction = os.listdir(os.getcwd())
-    logger.debug("Extracting archive")
+    log.debug("Extracting archive "+build_file)
     with tarfile.open(build_file, "r:gz") as tarball:
         tarball.extractall()
     list_after_extraction = os.listdir(os.getcwd())
@@ -80,7 +81,8 @@ def build_dist(version, download):
     if len(extracted_members) == 1:
         extracted_member = extracted_members[0]
     else:
-        Intersplunk.generateErrorResults("Archive contained more than one item. Please use archive with single member.")
+        log.error("Source archive is malformed (multiple project roots?)")
+        Intersplunk.generateErrorResults("Aborting: Python source archive contained more than one project root. ")
         sys.exit(7)
 
     # configure and build
@@ -96,7 +98,7 @@ def build_dist(version, download):
     del os.environ['OPENSSL_CONF']
     if 'PYTHONPATH' in os.environ:
         del os.environ['PYTHONPATH']
-    logger.debug("Configuring source")
+    log.debug("Configuring source "+os.path.join(os.curdir, 'configure'))
     configure = subprocess.Popen([os.path.join(os.curdir, 'configure'),
                                   optimize,
                                   '--with-ensurepip=install',
@@ -106,37 +108,44 @@ def build_dist(version, download):
     result, error = configure.communicate()
     for message in result.split('\n'):
         if message:
-            logger.info(message)
+            log.info("Configure results:" +message)
     for message in error.split('\n'):
         if message:
-            logger.error(message)
+            log.error("Configure results:" +message)
     if configure.returncode != 0:
+        log.error("Configure returned exit code "+str(configure.returncode))
+        Intersplunk.generateErrorResults("Configure returned "+str(make.returncode )+", aborting.")
+
         sys.exit(8)
-    logger.debug("Making")
+    log.debug("Making new python")
     make = subprocess.Popen(['make', '-j', '8'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True,
                             env=os.environ)
     result, error = make.communicate()
     for message in result.split('\n'):
         if message:
-            logger.info(message)
+            log.info("Make command said:  "+message)
     for message in error.split('\n'):
         if message:
-            logger.error(message)
+            log.error("Make command said:  "+message)
     if make.returncode != 0:
+        log.error("Make returned exit code "+str(make.returncode))
+        Intersplunk.generateErrorResults("Make returned "+str(make.returncode )+", aborting.")
         sys.exit(9)
-    logger.debug("Make install")
+    log.debug("Running make install ")
     install = subprocess.Popen(['make', 'altinstall'], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                universal_newlines=True, env=os.environ)
     result, error = install.communicate()
     for message in result.split('\n'):
         if message:
-            logger.info(message)
+            log.info("Make said: "+message)
     for message in error.split('\n'):
         if message:
-            logger.error(message)
+            log.error("Make said: "+message)
     if install.returncode != 0:
+        log.error("Install returned exit code "+str(install.returncode))
+        Intersplunk.generateErrorResults("Install step returned "+str(install.returncode )+", aborting.")
         sys.exit(10)
-    logger.debug("Determining binary of " + str(pyden_prefix))
+    log.debug("Determining binary of " + str(pyden_prefix))
     bin_dir = os.path.join(pyden_prefix, 'bin')
     os.chdir(bin_dir)
     largest_size = 0
@@ -147,10 +156,9 @@ def build_dist(version, download):
         if bin_size > largest_size:
             py_exec = os.path.join(bin_dir, binary)
             largest_size = bin_size
-    logger.debug("Found binary: "+str( py_exec))
+    log.debug("Found python binary (will deploy pip next): "+str( py_exec))
 
     # Running get-pip and others
-    logger.debug("Upgrading pip")
     if proxies:
         os.environ['HTTP_PROXY'] = proxies['http']
         os.environ['HTTPS_PROXY'] = proxies['https']
@@ -158,20 +166,30 @@ def build_dist(version, download):
     result, error = pip.communicate()
     for message in result.split('\n'):
         if message:
-            logger.info(message)
+            log.info("install pip said "+message)
     for message in error.split('\n'):
         if message:
-            logger.error(message)
+            log.error("install pip said "+message)
+    if pip.returncode != 0:
+        log.error("pip install returned exit code "+str(pip.returncode))
+        Intersplunk.generateErrorResults("pip Install step returned "+str(pip.returncode )+", aborting.")
+        sys.exit(11)
+ 
     pip = subprocess.Popen([py_exec, '-m', 'pip', 'install', 'virtualenv'], stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE, universal_newlines=True, env=os.environ)
     result, error = pip.communicate()
     for message in result.split('\n'):
         if message:
-            logger.info(message)
+            log.info("install venv said: "+message)
     for message in error.split('\n'):
         if message:
-            logger.error(message)
-    logger.info("Finished building Python {}. Distribution available at {}.".format(version, pyden_prefix))
+            log.error("install venv said: "+message)
+    if pip.returncode != 0:
+        log.error("pip install returned exit code "+str(pip.returncode))
+        Intersplunk.generateErrorResults("pip Install step returned "+str(pip.returncode )+", aborting.")
+        sys.exit(12)
+ 
+    log.info("Finished building Python {}. Distribution available at {}.".format(version, pyden_prefix))
 
     write_pyden_config(pyden_location, config, version, "executable", py_exec.lstrip(os.environ['SPLUNK_HOME']))
     if not config.has_section("default-pys") or not config.has_option("default-pys", "distribution"):
@@ -180,7 +198,7 @@ def build_dist(version, download):
 
 
 if __name__ == "__main__":
-    logger = setup_logging()
+    log = createWorkingLog()
     download_arg = True
     settings = dict()
     if "--cli" in sys.argv:
@@ -202,14 +220,17 @@ if __name__ == "__main__":
                           postargs={'search': latest_python_search, 'exec_mode': 'oneshot', 'output_mode': 'json'},
                           sessionKey=session_key)
         dist_version = json.loads(r[1])['results'][0]['version']
+        log.debug("Found current python version "+dist_version)
     except Exception as e:
-
+        log.error("Failed to find latest version of Python: " +str( e))
         Intersplunk.generateErrorResults("Failed to find latest version of Python: " +str( e))
         sys.exit(2)
+
+
     for arg in sys.argv:
         if "version" in arg:
             dist_version = str(arg.split("=")[1])
         if "download" in arg:
             download_arg = str(arg.split("=")[1])
-    logger.info("Creating Python distribution version" +str( dist_version))
-    build_dist(dist_version, download_arg)
+    log.info("Creating Python distribution version" +str( dist_version))
+    build_dist(dist_version, download_arg, log)

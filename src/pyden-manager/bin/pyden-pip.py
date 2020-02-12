@@ -1,7 +1,7 @@
 import sys
 import subprocess
-from splunk_logger import setup_logging
-from utils import load_pyden_config, get_proxies, pyden_env
+from splunk import Intersplunk
+from utils import load_pyden_config, get_proxies, pyden_env, createWorkingLog
 import os
 if sys.version > '3':
     from importlib import reload
@@ -17,7 +17,6 @@ def activate(py_exec):
         return
 
     sys.argv.append("reloaded")
-    from splunk import Intersplunk
     settings = dict()
     Intersplunk.readResults(settings=settings)
     session_key = settings['sessionKey']
@@ -31,8 +30,9 @@ def activate(py_exec):
 
 
 if __name__ == "__main__":
-    logger = setup_logging()
+    log = createWorkingLog()
     pm_config, config = load_pyden_config()
+
     pyden_location = pm_config.get('appsettings', 'location')
     env = False
     pip_arg_index = 1
@@ -44,9 +44,18 @@ if __name__ == "__main__":
             pip_arg_index = 2
             break
     if not env:
-        sys.exit(1)
+        log.warning("pip, invoked with empty env, CRASH!")
+        Intersplunk.generateErrorResults("Unknown/empty env, FAIL" )
+        sys.exit(2)
     py_exec = os.path.join(os.environ['SPLUNK_HOME'], config.get(env, 'executable'))
+    log.debug("pip using "+py_exec+"/python interpreter")
+
     activate(py_exec)
     sys.stdout.write("messages\n")
     sys.stdout.flush()
     pip = subprocess.call([py_exec, '-m', 'pip'] + sys.argv[pip_arg_index:-1])
+    if not pip == 0:
+        log.error("Pip exit status was non-zero "+str(pip))
+        Intersplunk.generateErrorResults("Pip failed returned error "+str(pip) )
+        sys.exit(3)
+
