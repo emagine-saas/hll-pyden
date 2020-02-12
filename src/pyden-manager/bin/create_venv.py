@@ -28,6 +28,8 @@ def activate(py_exec):
     log.debug("Applying external override "+str(confFile)+" on config file")
      
     forkEnv=pyden_env(confFile, py_exec, pydenFile )
+    if not 'SPLUNK_HOME' in forkEnv:
+        forkEnv['SPLUNK_HOME']='/opt/splunk'
     os.execve(py_exec, ['python'] + sys.argv, forkEnv)
 
 def getBtoolConfig():
