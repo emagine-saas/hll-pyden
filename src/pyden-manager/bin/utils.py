@@ -83,6 +83,8 @@ def pyden_env(confFile, py_exec, pyden):
     base = os.path.dirname(py_exec)
     forkEnv['PATH'] = base + os.pathsep + os.environ["PATH"]
     forkEnv['PYDEN_CONFIG']=pyden
+    if not 'SPLUNK_HOME' in forkEnv:
+        forkEnv['SPLUNK_HOME']='/opt/splunk'
     return forkEnv
 
 def createWorkingLog():

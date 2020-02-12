@@ -1,7 +1,8 @@
 import os
 import logging
 import logging.handlers
-
+# DEPRECATED, no notes on how to enable this class
+# also DEPRECATED as it dupes a syslib, presumbably with less error checking, planned support etc etc 
 
 # The following two functions are taken from the `splunk` module written into Splunk Enterprise
 # These are necessary to set up logging in accordance with Splunk defined best practice but the module is

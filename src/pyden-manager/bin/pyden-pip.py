@@ -10,13 +10,17 @@ confFile=False
 if sys.argv[-1].startswith("conf="):
     confFile= sys.argv[-1].replace("conf=", "")
 
-def activate(py_exec):
+def activate(py_exec, log):
     if sys.argv[-1] == "reloaded":
         reload(os)
         reload(sys)
         return
 
-    sys.argv.append("reloaded")
+    if "conf=" in sys.argv[-1] :
+        sys.argv[-1]="reloaded"
+    else:
+        sys.argv.append("reloaded")
+
     settings = dict()
     Intersplunk.readResults(settings=settings)
     session_key = settings['sessionKey']
@@ -50,12 +54,13 @@ if __name__ == "__main__":
     py_exec = os.path.join(os.environ['SPLUNK_HOME'], config.get(env, 'executable'))
     log.debug("pip using "+py_exec+"/python interpreter")
 
-    activate(py_exec)
+    activate(py_exec, log)
     sys.stdout.write("messages\n")
     sys.stdout.flush()
     pip = subprocess.call([py_exec, '-m', 'pip'] + sys.argv[pip_arg_index:-1])
-    if not pip == 0:
+    if pip != 0:
         log.error("Pip exit status was non-zero "+str(pip))
-        Intersplunk.generateErrorResults("Pip failed returned error "+str(pip) )
+        Intersplunk.generateErrorResults("[the real] Pip failed returned error "+str(pip) )
         sys.exit(3)
+    log.debug("pyden pip completed ")
 
