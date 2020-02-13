@@ -43,7 +43,7 @@ def activate_venv(env, confFile):
         reload(os)
         reload(sys)
         return
-    forkEnv=pyden_env(confFile, py_exec, proc_out ) 
+    forkEnv=pyden_env(confFile, py_exec, pout ) 
     os.execve(py_exec, ['python'] + sys.argv, forkEnv)
 
 def activate_venv_or_die(env=False, confFile=False):

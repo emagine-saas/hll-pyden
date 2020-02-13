@@ -42,6 +42,8 @@ Installation of the PyDen Manager follows the same process as any other Splunk a
 
 Both PyDen and PyDen Manager need to be installed on the same host. After both apps are installed, the PyDen Manager needs to be configured through the `pyden.conf` file. This file contains two stanzas: `download` and `app`. The `download` stanza has a single attribute called `url` which is used to specify the location from where Python is downloaded. It is not recommended to change this location except in the need to app proxy information. If a location other than [www.python.org](https://www.python.org) there will be significant gaps in the functionality of the dashboards. The `app` stanza contains two attributes `optimize` and `location`. The `location` attribute is the absolute path of the location of the PyDen app and the `optimize` attribute is a boolean which indicates whether or not Python will be built using the `--enable-optimizations` parameter. Enabling optimizations will provide significant speed improvements but takes significantly longer to build. 
 
+If you want to edit this project, set DESIRED_LOG_LEVEL in the utils.py to logger.DEBUG. If you are just deploying this tool, I suggest leaving this at logging.ERROR.   
+
 # Custom Commands
 There are three primary custom commands that make up the core functionality of PyDen: `createdist`, `createvenv`, and `pip`. There are additional suplemental commands that primarily aid in working with the dashboards.
 

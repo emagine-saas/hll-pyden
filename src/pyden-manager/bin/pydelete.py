@@ -4,7 +4,7 @@ from utils import load_pyden_config, createWorkingLog
 import shutil
 
 def whine(op, fn, excInfo):
-"""
+    """
 If onerror is provided, it must be a callable that accepts three parameters: 
    function, path, and excinfo. 
      The first parameter, function, is the function which raised the exception; it will be os.path.islink(), os.listdir(), os.remove() or os.rmdir(). 
