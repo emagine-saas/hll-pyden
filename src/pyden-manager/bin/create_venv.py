@@ -1,9 +1,8 @@
 import sys
 import os
 import subprocess
-from splunk import Intersplunk
 from utils import load_pyden_config, write_pyden_config, pyden_env, createWorkingLog
-if sys.version >= '3':
+if sys.version_info[0] >= 3:
     from importlib import reload
 
 confFile=False
@@ -47,14 +46,18 @@ if __name__ == "__main__":
             args[k] = v
         except ValueError:
             log.error("Incorrect argument format provided: "+str(sys.argv))
-            Intersplunk.generateErrorResults("Incorrect argument format provided." )
+            if sys.version_info[0] > 2:
+                from splunk import Intersplunk
+                Intersplunk.generateErrorResults("Incorrect argument format provided." )
             sys.exit(2)
 
     pm_config, config = load_pyden_config()
     pyden_location = pm_config.get('appsettings', 'location')
     if 'name' not in args:
         log.error("No name param for the new environment was provided.")
-        Intersplunk.generateErrorResults("No name param for the new environment was provided." )
+        if sys.version_info[0] > 2:
+            from splunk import Intersplunk
+            Intersplunk.generateErrorResults("No name param for the new environment was provided." )
         sys.exit(3)
 
     # get executable
@@ -69,7 +72,9 @@ if __name__ == "__main__":
         activate(py_exec)
     else:
         log.error("Unknown Python version "+str(version)+" (looking at pyden.conf).")
-        Intersplunk.generateErrorResults( "Unknown Python version (looking at pyden.conf)." )
+        if sys.version_info[0] > 2:
+            from splunk import Intersplunk
+            Intersplunk.generateErrorResults( "Unknown Python version (looking at pyden.conf)." )
         sys.exit(4)
 
     if not config.has_option("default-pys", "environment"):
@@ -91,12 +96,16 @@ if __name__ == "__main__":
             log.error("Sub process said: "+message)
     if venv.returncode != 0:
         log.error( "Sub process return value "+venv.returncode+" isn't valid (did something crash?).")
-        Intersplunk.generateErrorResults( "Sub process return value "+venv.returncode+" isn't valid (did something crash?)." )
+        if sys.version_info[0] > 2:
+            from splunk import Intersplunk
+            Intersplunk.generateErrorResults( "Sub process return value "+venv.returncode+" isn't valid (did something crash?)." )
         sys.exit(5)
     venv_exec = os.path.join(venv_dir, name, 'bin', 'python')
     write_pyden_config(pyden_location, config, name, "executable", venv_exec.lstrip(os.environ['SPLUNK_HOME']))
     write_pyden_config(pyden_location, config, name, 'version', version)
     log.info("Successfully created venv ")
-    Intersplunk.addErrorMessage({}, "Everything is OK")
-    Intersplunk.outputResults( [ ])
+    if sys.version_info[0] > 2:
+        from splunk import Intersplunk
+        Intersplunk.addErrorMessage({}, "Everything is OK")
+        Intersplunk.outputResults( [ ])
 

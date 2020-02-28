@@ -15,15 +15,22 @@ def download_python(version, build_path):
     base_url = simpleRequest("/servicesNS/nobody/pyden-manager/properties/pyden/download/url",
                              sessionKey=session_key)[1]
     try:
-        base_url=str(base_url, 'utf-8')
+        if sys.version_info[0] >2:
+            base_url=str(base_url, 'utf-8')
+        else:
+            base_url=unicode(base_url )
+
         dpr = requests.get(base_url + "{0}/".format(str(version)), proxies=proxies)
     except Exception as ex:
         Intersplunk.generateErrorResults("Exception thrown getting python: ({0}, {1})".format(type(ex), ex))
         sys.exit(3)
     else:
         if dpr.status_code in range(200, 300):
+            if sys.version_info[0] >2:
+                tt=str(dpr.content, 'utf-8')
+            else:
+                tt=unicode(dpr.content )
 
-            tt=str(dpr.content, 'utf-8')
             tt=re.findall("href=\"(.*?)\"", tt)
 				# statements split up so I could check types
             python_link=False
@@ -33,10 +40,15 @@ def download_python(version, build_path):
 #            python_link = [link for link in re.findall("href=\"(.*?)\"", dpr.content) if link.endswith('tgz')][0]
             dpr = requests.get(base_url + "{0}/{1}".format(version, python_link), proxies=proxies)
         else:
-            Intersplunk.generateErrorResults(
+            if sys.version_info[0] >2:
+                Intersplunk.generateErrorResults(
                 "Failed to reach www.python.org. Request returned - Status code: {0}, Response: {1}".format(
-                   str(dpr.status_code, 'utf-8'), str(dpr.text, 'utf-8')))
-            sys.exit(4)
+                   str(dpr.content, 'utf-8'), str(dpr.content, 'utf-8')))
+            else:
+                Intersplunk.generateErrorResults(
+                "Failed to reach www.python.org. Request returned - Status code: {0}, Response: {1}".format(
+                   unicode(dpr.content ), unicode(dpr.content )))
+           sys.exit(4)
 
     if dpr.status_code in range(200, 300):
         # save
