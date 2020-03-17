@@ -7,6 +7,7 @@ from splunk.rest import simpleRequest
 from splunk import Intersplunk
 import requests
 import re
+import sys
 import shutil
 from utils import load_pyden_config, write_pyden_config, get_proxies, createWorkingLog
 
@@ -48,7 +49,7 @@ def download_python(version, build_path):
                 Intersplunk.generateErrorResults(
                 "Failed to reach www.python.org. Request returned - Status code: {0}, Response: {1}".format(
                    unicode(dpr.content ), unicode(dpr.content )))
-           sys.exit(4)
+            sys.exit(4)
 
     if dpr.status_code in range(200, 300):
         # save
@@ -218,6 +219,11 @@ if __name__ == "__main__":
     else:
         Intersplunk.readResults(settings=settings)
         session_key = settings['sessionKey']
+    if int(sys.version_info[0]) == 2 :
+        log.warn("In current edition may not use python2 " )
+        Intersplunk.generateErrorResults("In current edition may not use Python2")
+        sys.exit(13)
+
     proxies = get_proxies(session_key)
     latest_python_search = r"""
     | getversions 
