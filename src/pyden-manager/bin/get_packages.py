@@ -1,8 +1,12 @@
 import sys
 import requests
-from HTMLParser import HTMLParser
 from splunk import Intersplunk
 from utils import get_proxies
+if sys.version < '3':
+    from HTMLParser import HTMLParser
+else:
+    from html.parser import HTMLParser
+
 
 
 class PyPIHTMLParser(HTMLParser):
@@ -35,7 +39,7 @@ def get_simple_index():
 
 
 def get_package_description(package):
-    r = requests.get("https://pypi.python.org/pypi/%s/json" % package, proxies=proxies)
+    r = requests.get("https://pypi.org/pypi/%s/json" % package, proxies=proxies)
 
     return [{"description": r.json()['info']['description']}]
 
