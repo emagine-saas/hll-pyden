@@ -16,14 +16,14 @@ if sys.argv[-1].startswith("conf="):
 #          os.environ['SPLUNK_HOME']+os.sep+"lib"+os.sep+"python3.7"+os.sep+ "site-packages" +os.sep
 #    * SPLUNK_HOME to do normal stuff
 #
-def activate(py_exec):
-    if sys.argv[-1] == "reloaded":
+def pydenFork(py_exec, log, sysargs ):
+    if sysargs[-1] == "reloaded":
         reload(os)
         reload(sys)
         return
     pydenFile= getBtoolConfig()
 
-    sys.argv.append("reloaded")
+    sysargs.append("reloaded")
     log.debug("Applying external override "+str(confFile)+" on config file")
      
     forkEnv=pyden_env(confFile, py_exec, pydenFile )
@@ -35,30 +35,22 @@ def getBtoolConfig():
     proc_out, proc_err = proc.communicate()
     return proc_out.decode()
 
-if __name__ == "__main__":
-    log = createWorkingLog()
-    args = dict()
-    for arg in sys.argv[1:]:
+def setup(log, sysargs):
+    for arg in sysargs[1:]:
         try:
             if "reloaded" in arg:
                 continue
             k, v = arg.split('=')
             args[k] = v
         except ValueError:
-            log.error("Incorrect argument format provided: "+str(sys.argv))
-            if sys.version_info[0] > 2:
-                from splunk import Intersplunk
-                Intersplunk.generateErrorResults("Incorrect argument format provided." )
-            sys.exit(2)
+            log.error("Incorrect argument format provided: "+str(sysargs))
+            return [2, "Incorrect argument format provided."]
 
     pm_config, config = load_pyden_config()
     pyden_location = pm_config.get('appsettings', 'location')
     if 'name' not in args:
         log.error("No name param for the new environment was provided.")
-        if sys.version_info[0] > 2:
-            from splunk import Intersplunk
-            Intersplunk.generateErrorResults("No name param for the new environment was provided." )
-        sys.exit(3)
+        return [3, "No name param for the new environment was provided."]
 
     # get executable
     version = args.get('version')
@@ -69,14 +61,13 @@ if __name__ == "__main__":
     log.debug("Understood request as create venv for "+str(name)+" "+str(version)+".")
     if version in config.sections():
         py_exec = os.path.join(os.environ['SPLUNK_HOME'], config.get(version, 'executable'))
-        activate(py_exec)
+        return [0, py_exec]
     else:
         log.error("Unknown Python version "+str(version)+" (looking at pyden.conf).")
-        if sys.version_info[0] > 2:
-            from splunk import Intersplunk
-            Intersplunk.generateErrorResults( "Unknown Python version (looking at pyden.conf)." )
-        sys.exit(4)
+        return [4, "Unknown Python version (looking at pyden.conf)."]
 
+def createVenv(log  ):
+    pm_config, config = load_pyden_config()
     if not config.has_option("default-pys", "environment"):
         write_pyden_config(pyden_location, config, 'default-pys', 'environment', name)
 
@@ -90,16 +81,16 @@ if __name__ == "__main__":
     result, error = venv.communicate()
     for message in result.split('\n'):
         if message:
-            log.info("Sub process said: "+ message)
+            log.info("[stdout] Sub process said: "+ message)
     for message in error.split('\n'):
         if message:
-            log.error("Sub process said: "+message)
+            log.error("[stderr] Sub process said: "+message)
     if venv.returncode != 0:
         log.error( "Sub process return value "+venv.returncode+" isn't valid (did something crash?).")
         if sys.version_info[0] > 2:
             from splunk import Intersplunk
             Intersplunk.generateErrorResults( "Sub process return value "+venv.returncode+" isn't valid (did something crash?)." )
-        sys.exit(5)
+        return 5
     venv_exec = os.path.join(venv_dir, name, 'bin', 'python')
     write_pyden_config(pyden_location, config, name, "executable", venv_exec.lstrip(os.environ['SPLUNK_HOME']))
     write_pyden_config(pyden_location, config, name, 'version', version)
@@ -108,4 +99,16 @@ if __name__ == "__main__":
         from splunk import Intersplunk
         Intersplunk.addErrorMessage({}, "Everything is OK")
         Intersplunk.outputResults( [ ])
+
+
+if __name__ == "__main__":
+    log = createWorkingLog()
+    ret, text=setup(log, sys.argv)
+    if ret != 0 and sys.version_info[0] > 2:
+        from splunk import Intersplunk
+        Intersplunk.generateErrorResults(text )
+    elif ret == 0:
+        pydenFork(text, log, sys.argv)
+        createVenv(log, )
+
 

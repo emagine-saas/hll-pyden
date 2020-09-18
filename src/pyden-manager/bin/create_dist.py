@@ -1,3 +1,4 @@
+
 import sys
 import os
 import tarfile
@@ -9,12 +10,18 @@ import requests
 import re
 import sys
 import shutil
-from utils import load_pyden_config, write_pyden_config, get_proxies, createWorkingLog
+from utils import load_pyden_config, write_pyden_config, get_proxies, createWorkingLog, readConfig
+from bin.get_version import getVersions
+from distutils.version import LooseVersion
 
-
-def download_python(version, build_path):
-    base_url = simpleRequest("/servicesNS/nobody/pyden-manager/properties/pyden/download/url",
+# return int for crash, or a string for a path
+def download_python(version, build_path, proxies, asCSV): 
+    if asCSV:
+        base_url = simpleRequest("/servicesNS/nobody/pyden-manager/properties/pyden/download/url",
                              sessionKey=session_key)[1]
+    else:
+        base_url = readConfig('download', 'url')
+
     try:
         if sys.version_info[0] >2:
             base_url=str(base_url, 'utf-8')
@@ -23,8 +30,9 @@ def download_python(version, build_path):
 
         dpr = requests.get(base_url + "{0}/".format(str(version)), proxies=proxies)
     except Exception as ex:
-        Intersplunk.generateErrorResults("Exception thrown getting python: ({0}, {1})".format(type(ex), ex))
-        sys.exit(3)
+        if asCSV:
+            Intersplunk.generateErrorResults("Exception thrown getting python: ({0}, {1})".format(type(ex), ex))
+        return 3
     else:
         if dpr.status_code in range(200, 300):
             if sys.version_info[0] >2:
@@ -33,23 +41,24 @@ def download_python(version, build_path):
                 tt=unicode(dpr.content )
 
             tt=re.findall("href=\"(.*?)\"", tt)
-				# statements split up so I could check types
+                # statements split up so I could check types
             python_link=False
             for python_link in tt:
                 if python_link.endswith('tgz'):
                     break
-#            python_link = [link for link in re.findall("href=\"(.*?)\"", dpr.content) if link.endswith('tgz')][0]
+#  python_link = [link for link in re.findall("href=\"(.*?)\"", dpr.content) if link.endswith('tgz')][0]
             dpr = requests.get(base_url + "{0}/{1}".format(version, python_link), proxies=proxies)
         else:
-            if sys.version_info[0] >2:
-                Intersplunk.generateErrorResults(
+            if asCSV:
+                if sys.version_info[0] >2:
+                    Intersplunk.generateErrorResults(
                 "Failed to reach www.python.org. Request returned - Status code: {0}, Response: {1}".format(
                    str(dpr.content, 'utf-8'), str(dpr.content, 'utf-8')))
-            else:
-                Intersplunk.generateErrorResults(
+                else:
+                    Intersplunk.generateErrorResults(
                 "Failed to reach www.python.org. Request returned - Status code: {0}, Response: {1}".format(
                    unicode(dpr.content ), unicode(dpr.content )))
-            sys.exit(4)
+            return 4
 
     if dpr.status_code in range(200, 300):
         # save
@@ -57,26 +66,30 @@ def download_python(version, build_path):
         with open(build_file, "wb") as download:
             download.write(dpr.content)
     else:
-        Intersplunk.generateErrorResults(
-            "Failed to download python. Request returned - Status code: {0}, Response: {1}".format(str(dpr.status_code),
-                                              str(dpr.text)))
-        sys.exit(5)
+        if asCSV:
+            Intersplunk.generateErrorResults(
+            "Failed to download python. Request returned - Status code: {0}, Response: {1}".
+                format(str(dpr.status_code), str(dpr.text)))
+        return 5
     return build_file
 
 
-def build_dist(version, download, log):
+def build_dist(version, download, log, proxies, asCSV):
     pm_config, config = load_pyden_config()
     pyden_location = pm_config.get('appsettings', 'location')
     if version in config.sections():
         log.warning("Requested to install version of python already present "+version)
-        Intersplunk.generateErrorResults("Version already exists.")
+        if asCSV:
+            Intersplunk.generateErrorResults("Version already exists.")
         sys.exit(6)
     build_path = os.path.join(os.getcwd(), 'build')
     if not os.path.isdir(build_path):
         os.mkdir(build_path)
     if download is True:
         log.debug("Downloading Python")
-        build_file = download_python(version, build_path)
+        build_file = download_python(version, build_path, proxies, asCSV)
+        if type(build_file) == type(1): # ie if D/L bailed out, stop working, as no src
+            return build_file
     else:
         log.debug("Using existing source archive"+download)
         build_file = os.path.join(build_path, download)
@@ -95,7 +108,8 @@ def build_dist(version, download, log):
         extracted_member = extracted_members[0]
     else:
         log.error("Source archive is malformed (multiple project roots?)")
-        Intersplunk.generateErrorResults("Aborting: Python source archive contained more than one project root. ")
+        if asCSV:
+            Intersplunk.generateErrorResults("Aborting: Python source archive contained more than one project root. ")
         sys.exit(7)
 
     # configure and build
@@ -103,8 +117,12 @@ def build_dist(version, download, log):
     if not os.path.isdir(pyden_prefix):
         os.makedirs(pyden_prefix)
     os.chdir(os.path.join(os.getcwd(), extracted_member))
-    optimize_conf = simpleRequest("/servicesNS/nobody/pyden-manager/properties/pyden/appsettings/optimize",
+    if asCSV:
+        optimize_conf = simpleRequest("/servicesNS/nobody/pyden-manager/properties/pyden/appsettings/optimize",
                                   sessionKey=session_key)[1]
+    else:
+        optimize_conf=readConfig('appsettings', 'optimize')
+
     optimize = '--enable-optimizations' if optimize_conf in ['true', 'True', '1', 1] else ''
     # remove environment variables. needed to use host libraries instead of splunk's built-in.
     del os.environ['LD_LIBRARY_PATH']
@@ -127,7 +145,8 @@ def build_dist(version, download, log):
             log.error("Configure results:" +message)
     if configure.returncode != 0:
         log.error("Configure returned exit code "+str(configure.returncode))
-        Intersplunk.generateErrorResults("Configure returned "+str(make.returncode )+", aborting.")
+        if asCSV:
+            Intersplunk.generateErrorResults("Configure returned "+str(make.returncode )+", aborting.")
 
         sys.exit(8)
     log.debug("Making new python")
@@ -142,7 +161,8 @@ def build_dist(version, download, log):
             log.error("Make command said:  "+message)
     if make.returncode != 0:
         log.error("Make returned exit code "+str(make.returncode))
-        Intersplunk.generateErrorResults("Make returned "+str(make.returncode )+", aborting.")
+        if asCSV:
+            Intersplunk.generateErrorResults("Make returned "+str(make.returncode )+", aborting.")
         sys.exit(9)
     log.debug("Running make install ")
     install = subprocess.Popen(['make', 'altinstall'], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -156,7 +176,8 @@ def build_dist(version, download, log):
             log.error("Make said: "+message)
     if install.returncode != 0:
         log.error("Install returned exit code "+str(install.returncode))
-        Intersplunk.generateErrorResults("Install step returned "+str(install.returncode )+", aborting.")
+        if asCSV:
+            Intersplunk.generateErrorResults("Install step returned "+str(install.returncode )+", aborting.")
         sys.exit(10)
     log.debug("Determining binary of " + str(pyden_prefix))
     bin_dir = os.path.join(pyden_prefix, 'bin')
@@ -185,7 +206,8 @@ def build_dist(version, download, log):
             log.error("install pip said "+message)
     if pip.returncode != 0:
         log.error("pip install returned exit code "+str(pip.returncode))
-        Intersplunk.generateErrorResults("pip Install step returned "+str(pip.returncode )+", aborting.")
+        if asCSV:
+            Intersplunk.generateErrorResults("pip Install step returned "+str(pip.returncode )+", aborting.")
         sys.exit(11)
  
     pip = subprocess.Popen([py_exec, '-m', 'pip', 'install', 'virtualenv'], stdout=subprocess.PIPE,
@@ -199,7 +221,8 @@ def build_dist(version, download, log):
             log.error("install venv said: "+message)
     if pip.returncode != 0:
         log.error("pip install returned exit code "+str(pip.returncode))
-        Intersplunk.generateErrorResults("pip Install step returned "+str(pip.returncode )+", aborting.")
+        if asCSV:
+            Intersplunk.generateErrorResults("pip Install step returned "+str(pip.returncode )+", aborting.")
         sys.exit(12)
  
     log.info("Finished building Python {}. Distribution available at {}.".format(version, pyden_prefix))
@@ -209,46 +232,49 @@ def build_dist(version, download, log):
         write_pyden_config(pyden_location, config, 'default-pys', 'distribution', version)
     return
 
-
-if __name__ == "__main__":
-    log = createWorkingLog()
+def createDist(log, sysargs, asCSV ):
     download_arg = True
     settings = dict()
-    if "--cli" in sys.argv:
+
+#    latest_python_search = r"""
+#    | getversions 
+#    | rex field=version "(?<v_M>\d+)\.(?<v_m>\d+)\.(?<v_mm>\d+)" 
+#    | eval v_M=tonumber(v_M), v_m=tonumber(v_m), v_mm=tonumber(v_mm) 
+#    | sort -v_M, -v_m, -v_mm 
+#    | table version 
+#    | head 1
+#    """
+    dist_version= getVersions(log, False, False )
+    dist_version=map(lambda a: a['version'], dist_version)
+# sorted(self.version_set, key=lambda v:LooseVersion(v.version_number))
+    dist_version=sorted( dist_version, key=lambda a:LooseVersion(a) )
+    dist_version=dist_version[0]
+
+    if int(sys.version_info[0]) == 2 :
+        log.warn("In current edition may not use python2 " )
+        Intersplunk.generateErrorResults("In current edition may not use Python2")
+        return 13
+
+    if "--cli" in sysargs:
         session_key = sys.stdin.read()
     else:
         Intersplunk.readResults(settings=settings)
         session_key = settings['sessionKey']
-    if int(sys.version_info[0]) == 2 :
-        log.warn("In current edition may not use python2 " )
-        Intersplunk.generateErrorResults("In current edition may not use Python2")
-        sys.exit(13)
-
     proxies = get_proxies(session_key)
-    latest_python_search = r"""
-    | getversions 
-    | rex field=version "(?<v_M>\d+)\.(?<v_m>\d+)\.(?<v_mm>\d+)" 
-    | eval v_M=tonumber(v_M), v_m=tonumber(v_m), v_mm=tonumber(v_mm) 
-    | sort -v_M, -v_m, -v_mm 
-    | table version 
-    | head 1
-    """
-    try:
-        r = simpleRequest("/servicesNS/nobody/pyden-manager/search/jobs",
-                          postargs={'search': latest_python_search, 'exec_mode': 'oneshot', 'output_mode': 'json'},
-                          sessionKey=session_key)
-        dist_version = json.loads(r[1])['results'][0]['version']
-        log.debug("Found current python version "+dist_version)
-    except Exception as e:
-        log.error("Failed to find latest version of Python: " +str( e))
-        Intersplunk.generateErrorResults("Failed to find latest version of Python: " +str( e))
-        sys.exit(2)
 
 
-    for arg in sys.argv:
+    for arg in sysargs:
         if "version" in arg:
             dist_version = str(arg.split("=")[1])
         if "download" in arg:
             download_arg = str(arg.split("=")[1])
-    log.info("Creating Python distribution version" +str( dist_version))
-    build_dist(dist_version, download_arg, log)
+    log.info("Creating Python distribution version " +str( dist_version))
+    return build_dist(dist_version, download_arg, log, proxies, asCSV) 
+
+
+
+
+if __name__ == "__main__":
+    log = createWorkingLog()
+    sys.exit(createDist(log, sys.argv, True))
+

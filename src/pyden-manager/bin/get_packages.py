@@ -30,27 +30,33 @@ class PyPIHTMLParser(HTMLParser):
                 self.packages.append(package)
 
 
-def get_simple_index():
+def get_simple_index( proxies) ->list :
     parser = PyPIHTMLParser()
 
     r = requests.get("https://pypi.org/simple/", proxies=proxies)
     parser.feed(r.text)
     return [{'package': package} for package in parser.packages]
 
-
-def get_package_description(package):
+def get_package_description(package, proxies) ->list:
     r = requests.get("https://pypi.org/pypi/%s/json" % package, proxies=proxies)
 
     return [{"description": r.json()['info']['description']}]
 
+def getPackages(sysargs, asCSV ):
+    settings = dict()
+    proxies = get_proxies(None)
+    if sysargs[1] == "pypi_simple_index":
+        results = get_simple_index( proxies)
+    else:
+        results = get_package_description(sysargs[1], proxies)
+
+    if asCSV:
+        Intersplunk.outputResults(results)
+    else:
+        return results
 
 if __name__ == "__main__":
-    settings = dict()
-    Intersplunk.readResults(settings=settings)
-    session_key = settings['sessionKey']
-    proxies = get_proxies(session_key)
-    if sys.argv[1] == "pypi_simple_index":
-        results = get_simple_index()
-    else:
-        results = get_package_description(sys.argv[1])
-    Intersplunk.outputResults(results)
+    getPackages(sys.argv, True)
+
+
+

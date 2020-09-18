@@ -15,17 +15,15 @@ Exceptions raised by onerror will not be caught.
 """
     log.error("FS Delete cmd failed on "+str(fn)+" saying "+str(excInfo))
 
-
-if __name__ == "__main__":
-    log=createWorkingLog()
-    pm_config, config = load_pyden_config()
+def setup( log, sysargs, pm_config, config ) ->dict:
     pyden_location = pm_config.get('appsettings', 'location')
     local_conf = os.path.join(pyden_location, 'local', 'pyden.conf')
+
     local_dir = os.path.dirname(local_conf)
-    name = sys.argv[1]
+    name = sysargs[1]
     if name not in config.sections():
         log.error("delete FAIL: First param '"+name+"' doesn't seem to be installed here (conf).")
-        sys.exit(2)
+        return {'exit':2, 'dir':local_dir, 'dist':None, 'venv':None}
     pytype = False
     dist_dir = os.path.join(local_dir, 'lib', 'dist')
     venv_dir = os.path.join(local_dir, 'lib', 'venv')
@@ -35,12 +33,16 @@ if __name__ == "__main__":
         pytype = "venv"
     if not pytype:
         log.error("delete FAIL: First param '"+name+"' doesn't seem to be installed here (FS).")
-        sys.exit(3)
-    config.remove_section(name)
+        return { 'exit':3, 'dir':local_dir, 'dist':None, 'venv':None}
+    return { 'exit':0, 'dir':local_dir, 'dist':dist_dir, 'venv':venv_dir, 'remove':name}
+
+
+def pyDelete(log, values, config) ->int:
+    config.remove_section( values['remove'])
 
     if not os.path.isdir(local_dir):
         os.mkdir(local_dir)
-    shutil.rmtree(os.path.join(local_dir, 'lib', pytype, name), False, whine )
+    shutil.rmtree(os.path.join(local_dir, 'lib', pytype, values['remove']), False, whine )
 
     if pytype == 'dist':
         pytype='distribution'
@@ -51,4 +53,19 @@ if __name__ == "__main__":
     with open(local_conf, 'w+') as configfile:
         config.write(configfile)
 
-    log.error("[unless this message is after errors] Successfully deleted "+name)
+    log.error("[unless this message is after errors] Successfully deleted "+ values['remove'])
+    return 0
+
+
+if __name__ == "__main__":
+    log=createWorkingLog()
+# I need to simplify the config object thing
+# maybe an object?
+    pm_config, config = load_pyden_config()
+    values=setup(log, sys.argv, pm_config, config )
+    if values.get('exit')==0:
+        sys.exit(pyDelete(log, values, config))
+    else:
+        sys.exit( values['exit'])
+
+

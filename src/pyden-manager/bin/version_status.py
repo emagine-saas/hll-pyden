@@ -3,19 +3,15 @@ import sys
 import os
 from ConfigParser import ConfigParser
 
+def VersionStatus( sysargs, readSide, writeSide) ->int:
+    versionfield = sysargs[1]
+    statusfield = sysargs[2]
+    is_defaultfield = sysargs[3]
 
-def main():
-    versionfield = sys.argv[1]
-    statusfield = sys.argv[2]
-    is_defaultfield = sys.argv[3]
-
-    infile = sys.stdin
-    outfile = sys.stdout
-
-    r = csv.DictReader(infile)
+    r = csv.DictReader( readSide )
     header = r.fieldnames
 
-    w = csv.DictWriter(outfile, fieldnames=header)
+    w = csv.DictWriter( writeSide, fieldnames=header)
     w.writeheader()
 
     default_conf = os.path.abspath(os.path.join(os.pardir, 'default', 'pyden.conf'))
@@ -34,12 +30,13 @@ def main():
     for result in r:
         if versionfield not in result.keys():
             # no version provided
-            sys.exit(1)
+            return 1
         version = result[versionfield]
         result[statusfield] = 1 if version in pyden_config.sections() else 0
         result[is_defaultfield] = 1 if version == default_version else 0
         w.writerow(result)
-
+    return 0
 
 if __name__ == "__main__":
-    main()
+    sys.exit( VersionStatus( sys.argv, sys.stdin, sys.stdout) )
+

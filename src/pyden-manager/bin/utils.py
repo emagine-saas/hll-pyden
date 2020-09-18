@@ -6,10 +6,10 @@ import logging
 DESIRED_LOG_LEVEL=logging.DEBUG
 from splunk_logger import setup_logging
 if sys.version < '3':
-    from ConfigParser import ConfigParser
+    from ConfigParser import ConfigParser,NoOptionError, NoSectionError
     from StringIO import StringIO
 else:
-    from configparser import ConfigParser
+    from configparser import ConfigParser,NoOptionError, NoSectionError
     from io import StringIO
 
 # this log object is turned off somewhere
@@ -48,6 +48,11 @@ def write_pyden_config(pyden_location, config, stanza, attribute, value):
 
 
 def get_proxies(session_key):
+    if(type(session_key) == type(None)):
+        settings=dict()
+        Intersplunk.readResults(settings=settings)
+        session_key = settings['sessionKey']
+
     import splunk.entity as entity
     util_logger.debug("Getting proxy settings")
     myapp = 'pyden-manager'
@@ -86,6 +91,30 @@ def pyden_env(confFile, py_exec, pyden):
     if not 'SPLUNK_HOME' in forkEnv:
         forkEnv['SPLUNK_HOME']='/opt/splunk'
     return forkEnv
+
+# this function should be called
+# def readLocalConfigWithoutANetworkStack(section, item):
+def readConfig(section, item):
+    config=os.path.dirname(os.path.dirname( os.path.realpath(__file__))) + os.sep+ "local"+os.sep+ "pyden.conf"
+    c = ConfigParser()
+    c.read( config)
+    ret=False
+    try:
+        ret = c.get( section, item )
+    except NoOptionError:
+        pass
+    except NoSectionError:
+        config=os.path.dirname(os.path.dirname( os.path.realpath(__file__))) + os.sep+ "default"+os.sep+ "pyden.conf"
+        c2 = ConfigParser()
+        c2.read( config)
+        try:
+            ret = c2.get( section, item )
+        except NoOptionError:
+            pass
+        except NoSectionError:
+            pass
+
+    return ret
 
 def createWorkingLog():
     LOGFILE = os.sep.join([ os.environ['SPLUNK_HOME'], 'var', 'log', 'splunk', 'hll-setup.log'])
