@@ -1,12 +1,14 @@
 import sys
+import os
 import requests
-from splunk import Intersplunk
 from utils import get_proxies
 if sys.version < '3':
     from HTMLParser import HTMLParser
+    sys.path.append( os.environ['SPLUNK_HOME']+os.sep+ 'lib' +os.sep+'python2.7'+os.sep+'site-packages' + os.sep+'splunk'+os.sep)
 else:
     from html.parser import HTMLParser
-
+    sys.path.append( os.environ['SPLUNK_HOME']+os.sep+ 'lib' +os.sep+'python3.7'+os.sep+'site-packages' + os.sep+'splunk'+os.sep)
+from splunk import Intersplunk
 
 
 class PyPIHTMLParser(HTMLParser):

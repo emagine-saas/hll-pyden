@@ -11,7 +11,7 @@ import re
 import sys
 import shutil
 from utils import load_pyden_config, write_pyden_config, get_proxies, createWorkingLog, readConfig
-from bin.get_version import getVersions
+from get_versions import getVersions
 from distutils.version import LooseVersion
 
 # return int for crash, or a string for a path

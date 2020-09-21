@@ -8,9 +8,12 @@ from splunk_logger import setup_logging
 if sys.version < '3':
     from ConfigParser import ConfigParser,NoOptionError, NoSectionError
     from StringIO import StringIO
+    sys.path.append( os.environ['SPLUNK_HOME']+os.sep+ 'lib' +os.sep+'python2.7'+os.sep+'site-packages' + os.sep+'splunk'+os.sep)
 else:
     from configparser import ConfigParser,NoOptionError, NoSectionError
     from io import StringIO
+    sys.path.append( os.environ['SPLUNK_HOME']+os.sep+ 'lib' +os.sep+'python3.7'+os.sep+'site-packages' + os.sep+'splunk'+os.sep)
+import Intersplunk
 
 # this log object is turned off somewhere
 # also this set of logging is less useful as it doesnt report current state, just that the script got that far
@@ -49,6 +52,8 @@ def write_pyden_config(pyden_location, config, stanza, attribute, value):
 
 def get_proxies(session_key):
     if(type(session_key) == type(None)):
+        if sys.stdin.closed:
+            return {}
         settings=dict()
         Intersplunk.readResults(settings=settings)
         session_key = settings['sessionKey']
