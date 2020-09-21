@@ -15,18 +15,15 @@ from get_versions import getVersions
 from distutils.version import LooseVersion
 
 # return int for crash, or a string for a path
-def download_python(version, build_path, proxies, asCSV): 
-    if asCSV:
-        base_url = simpleRequest("/servicesNS/nobody/pyden-manager/properties/pyden/download/url",
-                             sessionKey=session_key)[1]
-    else:
-        base_url = readConfig('download', 'url')
+def download_python(version, build_path, proxies, asCSV, session_key): 
+    base_url = readConfig('download', 'url')
 
     try:
-        if sys.version_info[0] >2:
-            base_url=str(base_url, 'utf-8')
-        else:
-            base_url=unicode(base_url )
+        if type( base_url) != type(" "):
+            if sys.version_info[0] >2:
+                base_url=str(base_url, 'utf-8')
+            else:
+                base_url=unicode(base_url )
 
         dpr = requests.get(base_url + "{0}/".format(str(version)), proxies=proxies)
     except Exception as ex:
@@ -74,7 +71,7 @@ def download_python(version, build_path, proxies, asCSV):
     return build_file
 
 
-def build_dist(version, download, log, proxies, asCSV):
+def build_dist(version, download, log, proxies, asCSV, session_key):
     pm_config, config = load_pyden_config()
     pyden_location = pm_config.get('appsettings', 'location')
     if version in config.sections():
@@ -87,7 +84,7 @@ def build_dist(version, download, log, proxies, asCSV):
         os.mkdir(build_path)
     if download is True:
         log.debug("Downloading Python")
-        build_file = download_python(version, build_path, proxies, asCSV)
+        build_file = download_python(version, build_path, proxies, asCSV, session_key)
         if type(build_file) == type(1): # ie if D/L bailed out, stop working, as no src
             return build_file
     else:
@@ -117,11 +114,7 @@ def build_dist(version, download, log, proxies, asCSV):
     if not os.path.isdir(pyden_prefix):
         os.makedirs(pyden_prefix)
     os.chdir(os.path.join(os.getcwd(), extracted_member))
-    if asCSV:
-        optimize_conf = simpleRequest("/servicesNS/nobody/pyden-manager/properties/pyden/appsettings/optimize",
-                                  sessionKey=session_key)[1]
-    else:
-        optimize_conf=readConfig('appsettings', 'optimize')
+    optimize_conf=readConfig('appsettings', 'optimize')
 
     optimize = '--enable-optimizations' if optimize_conf in ['true', 'True', '1', 1] else ''
     # remove environment variables. needed to use host libraries instead of splunk's built-in.
@@ -185,6 +178,7 @@ def build_dist(version, download, log, proxies, asCSV):
     largest_size = 0
     py_exec = ""
     bins = os.listdir(bin_dir)
+    print("Files I know about ["+bin_dir+"] ["+pyden_location +"] "+ str( bins))
     for binary in bins:
         bin_size = os.path.getsize(binary)
         if bin_size > largest_size:
@@ -257,11 +251,13 @@ def createDist(log, sysargs, asCSV ):
 
     if "--cli" in sysargs:
         session_key = sys.stdin.read()
+    elif '--no-block' in sysargs:
+        session_key=None
+        sys.stdin.close()
     else:
         Intersplunk.readResults(settings=settings)
         session_key = settings['sessionKey']
     proxies = get_proxies(session_key)
-
 
     for arg in sysargs:
         if "version" in arg:
@@ -269,7 +265,7 @@ def createDist(log, sysargs, asCSV ):
         if "download" in arg:
             download_arg = str(arg.split("=")[1])
     log.info("Creating Python distribution version " +str( dist_version))
-    return build_dist(dist_version, download_arg, log, proxies, asCSV) 
+    return build_dist(dist_version, download_arg, log, proxies, asCSV, session_key) 
 
 
 
