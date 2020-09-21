@@ -6,13 +6,13 @@ My fork of pyden suite does work with splunk 8.0.1, 8.0.2 and 8.0.3, signed "me"
 Interim notes (so I dont forget; I will tidyup this text at the end):
 * Removeed most global variables
 * Removed most code from global scope (i.e. moved into functions). Both these two are necessary because I'm adding unit tests
-* Removed the "can store any config setting in any file" thing that splunk likes; as its a silly feature. This means I lookup config items be looking at the config file; not making a HTTPS request
+* Removed the "can store any config setting in any file" thing that splunk likes; as its a silly feature. This means I lookup config items by looking at the config file; not making a HTTPS request
 * Removed broken logging (probably due to point 3; but undocumented and broken code is pointless and not valuable) 
 * Fix module __ init __ and add lookup paths; so imports works; as normal code
-* This means there is no need to have a session cookie; so you can run the tool from the CLI.   
+* This means there is no need to have a session cookie; so you can now run the tool from the CLI.   
 * First author doesnt not believe in accessible repos; so my fixes remain here 
 
-orihinal text:
+original text:
 ## Overview 
 The goal of this application is to provide full Python functionality to Splunk. Currently, the Python distribution built in to Splunk runs on a version 2.7.x depending on the Splunk version. Additionally, there are significant core modules that are excluded in this distribution. This suite of apps will allow developers to create Python virtual environments and pick the Python version and modules installed to the environment. This includes core distributions of the interpreter in multiple 2.7.x and 3.5+ versions, as well as the use of pip for the installation of additional modules within a virtual environment.
 
