@@ -11,6 +11,7 @@ Interim notes (so I dont forget; I will tidyup this text at the end):
 * Fix module __ init __ and add lookup paths; so imports works; as normal code
 * This means there is no need to have a session cookie; so you can now run the tool from the CLI.   
 * First author doesnt believe in accessible repos, he says; so my fixes remain here (rather than merged into his repo)
+* Tests are comming...
 
 original text:
 ## Overview 
