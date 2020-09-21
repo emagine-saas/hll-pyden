@@ -67,7 +67,7 @@ def pydenPip(log, asCSV, sysargs, verbose) ->int:
 
 
 if __name__ == "__main__":
-# with an object to mantain state, I can skip alot of these args on the sideEffect functions.
+# with an object to maintain state, I can skip alot of these args on the sideEffect functions.
     log = createWorkingLog()
     sys.exit(pydenPip(log, True, sys.argv, False ))
 

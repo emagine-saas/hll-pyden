@@ -109,6 +109,6 @@ if __name__ == "__main__":
         Intersplunk.generateErrorResults(text )
     elif ret == 0:
         pydenFork(text, log, sys.argv)
-        createVenv(log, )
+        createVenv(log )
 
 

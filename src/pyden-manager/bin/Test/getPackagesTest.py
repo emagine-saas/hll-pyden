@@ -34,7 +34,7 @@ class getPackagesTest(unittest.TestCase) :
             self.assertTrue( type(ix) == type(dict())) 
             self.assertTrue( 'package' in ix )
             if not ix['package'][0] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ] :
-                self.assertTrue( len(ix['package'])>=1, "TEST "+ix['package']  )
+                self.assertTrue( len(ix['package'])>=1, "Package name seems good "+ix['package']  )
             else:
                 print("Whine, bad package name: "+ix['package'])          
 
@@ -47,8 +47,8 @@ class getPackagesTest(unittest.TestCase) :
         self.assertTrue( type(ret) == type(list()) )
         for ix in ret:
             self.assertTrue( type(ix) == type(dict())) 
-            self.assertTrue( 'description' in ix )
-            self.assertTrue( len(ix['description'])>3  )
+            self.assertTrue( 'description' in ix, "there is a description at all" )
+            self.assertTrue( len(ix['description'])>3, "the description has content"  )
 
     def test4(self):
         from utils import get_proxies
@@ -59,8 +59,8 @@ class getPackagesTest(unittest.TestCase) :
         self.assertTrue( type(ret) == type(list()) )
         for ix in ret:
             self.assertTrue( type(ix) == type(dict())) 
-            self.assertTrue( 'description' in ix )
-            self.assertTrue( len(ix['description'])>3  )
+            self.assertTrue( 'description' in ix, "there is a description at all" )
+            self.assertTrue( len(ix['description'])>3, "the description has content"  )
 
     def test5(self):
         from utils import get_proxies
@@ -73,9 +73,9 @@ class getPackagesTest(unittest.TestCase) :
             self.assertTrue( type(ix) == type(dict())) 
             self.assertTrue( 'package' in ix )
             if not ix['package'][0] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ] :
-                self.assertTrue( len(ix['package'])>=1, "TEST2 "+ix['package'] )
+                self.assertTrue( len(ix['package'])>=1, "package name has content  "+ix['package'] )
             else:
-                print("Whine, bad package name: "+ix['package'])          
+                print("Whine, bad package name: "+ix['package']) 
 
 
 if( __name__=='__main__'):

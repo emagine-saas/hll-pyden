@@ -178,7 +178,6 @@ def build_dist(version, download, log, proxies, asCSV, session_key):
     largest_size = 0
     py_exec = ""
     bins = os.listdir(bin_dir)
-    print("Files I know about ["+bin_dir+"] ["+pyden_location +"] "+ str( bins))
     for binary in bins:
         bin_size = os.path.getsize(binary)
         if bin_size > largest_size:
