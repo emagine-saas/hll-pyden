@@ -60,7 +60,7 @@ def pyDelete(log, values, config) ->int:
 if __name__ == "__main__":
     log=createWorkingLog()
 # I need to simplify the config object thing
-# maybe an object?
+# maybe convert this to an object?
     pm_config, config = load_pyden_config()
     values=setup(log, sys.argv, pm_config, config )
     if values.get('exit')==0:

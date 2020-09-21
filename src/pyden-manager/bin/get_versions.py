@@ -4,7 +4,6 @@ from splunk import Intersplunk
 import requests
 import re
 import sys
-from splunk_logger import setup_logging
 from utils import get_proxies, createWorkingLog, readConfig
 
 def getVersions(log, asCSV, verbose):

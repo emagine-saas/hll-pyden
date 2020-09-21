@@ -2,6 +2,10 @@ import csv
 import sys
 import os
 from ConfigParser import ConfigParser
+# this command is only used in the GUI
+# @link default/data/ui/views/versions.xml
+# @link default/data/ui/views/virtual_environments.xml 
+
 
 def VersionStatus( sysargs, readSide, writeSide) ->int:
     versionfield = sysargs[1]
@@ -10,7 +14,6 @@ def VersionStatus( sysargs, readSide, writeSide) ->int:
 
     r = csv.DictReader( readSide )
     header = r.fieldnames
-
     w = csv.DictWriter( writeSide, fieldnames=header)
     w.writeheader()
 
@@ -30,7 +33,7 @@ def VersionStatus( sysargs, readSide, writeSide) ->int:
     for result in r:
         if versionfield not in result.keys():
             # no version provided
-            return 1
+            return 2
         version = result[versionfield]
         result[statusfield] = 1 if version in pyden_config.sections() else 0
         result[is_defaultfield] = 1 if version == default_version else 0

@@ -20,6 +20,7 @@ class getPackagesTest(unittest.TestCase) :
     def test1(self):
         from utils import get_proxies
         proxies = get_proxies(None)
+# in this case this is expected to be {}, as nothing was supplied over the ENV
         self.assertTrue( proxies != False and proxies != None)
 
     def test2(self):

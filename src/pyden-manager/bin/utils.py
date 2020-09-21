@@ -4,7 +4,6 @@ import sys
 import logging
 # Log verboseness names are fairly obvious 
 DESIRED_LOG_LEVEL=logging.DEBUG
-from splunk_logger import setup_logging
 if sys.version < '3':
     from ConfigParser import ConfigParser,NoOptionError, NoSectionError
     from StringIO import StringIO
@@ -17,7 +16,8 @@ import Intersplunk
 
 # this log object is turned off somewhere
 # also this set of logging is less useful as it doesnt report current state, just that the script got that far
-util_logger = setup_logging()
+# WEIRD GLOBAL VARIABLE..?
+util_logger = createWorkingLog()
 
 
 def load_pyden_config():
