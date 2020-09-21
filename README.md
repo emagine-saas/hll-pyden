@@ -10,7 +10,7 @@ Interim notes (so I dont forget; I will tidyup this text at the end):
 * Removed broken logging (probably due to point 3; but undocumented and broken code is pointless and not valuable) 
 * Fix module __ init __ and add lookup paths; so imports works; as normal code
 * This means there is no need to have a session cookie; so you can now run the tool from the CLI.   
-* First author doesnt not believe in accessible repos; so my fixes remain here 
+* First author doesnt believe in accessible repos, he says; so my fixes remain here (rather than merged into his repo)
 
 original text:
 ## Overview 
