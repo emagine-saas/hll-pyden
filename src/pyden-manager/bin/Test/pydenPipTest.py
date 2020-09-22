@@ -40,7 +40,7 @@ class pydenPipTest(unittest.TestCase) :
 
         fakeArgs=['scriptname', 'environment=timesuite', 'install', '--upgrade' 'pip']
         ret=pydenPip(log, False, fakeArgs, True)
-        self.assertTrue( ret ==0, "Shouldn't be able to install made up venv "+ret )
+        self.assertTrue( ret ==0, "Compound statement from manual that is probably used by all "+ret )
 
 
 if( __name__=='__main__'):
