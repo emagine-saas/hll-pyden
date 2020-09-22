@@ -17,10 +17,11 @@ import Intersplunk
 # this log object is turned off somewhere
 # also this set of logging is less useful as it doesnt report current state, just that the script got that far
 # WEIRD GLOBAL VARIABLE..?
-util_logger = createWorkingLog()
 
 
 def load_pyden_config():
+    util_logger = createWorkingLog()
+
     util_logger.debug("Loading Pyden config")
     pm_config = ConfigParser()
     splunk_bin = os.path.join(os.environ['SPLUNK_HOME'], 'bin', 'splunk')
@@ -28,7 +29,7 @@ def load_pyden_config():
     proc = subprocess.Popen([splunk_bin, 'btool', 'pyden', 'list'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     proc_out, proc_err = proc.communicate()
     buf = StringIO(proc_out.decode())
-    pm_config.readfp(buf)
+    pm_config.read_file(buf, "./fakeName.conf")
     util_logger.debug("Grabbing config attributes like location")
     pyden_location = pm_config.get('appsettings', 'location')
     local_conf = os.path.abspath(os.path.join(pyden_location, 'local', 'pyden.conf'))
@@ -51,6 +52,7 @@ def write_pyden_config(pyden_location, config, stanza, attribute, value):
 
 
 def get_proxies(session_key):
+    util_logger = createWorkingLog()
     if(type(session_key) == type(None)):
         if sys.stdin.closed:
             return {}

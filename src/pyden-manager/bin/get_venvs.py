@@ -13,7 +13,7 @@ def getVEnvs(log, asCSV, verbose ):
     regex = re.compile(r"""\d\.\d{1,2}\.\d{1,2}""")
     venvs = [env for env in sections if not regex.match(env)]
     results = [{"environment": env} for env in venvs]
-    verbose and log.debug("There are "+len(results)+" sections")
+    verbose and log.debug("There are "+str(len(results))+" sections")
     for result in results:
         result['version'] = config.get(result['environment'], 'version')
         result["is_default"] = 1 if result['environment'] == config.get("default-pys", "environment") else 0

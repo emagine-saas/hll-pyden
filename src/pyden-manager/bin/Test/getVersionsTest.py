@@ -4,8 +4,6 @@
 import os
 import sys
 import unittest
-from util import craeteWorkingLog
-from get_versions import getVersions
 if os.name != "posix":
     # see below paths...
     sys.stderr.write("Test is setup for a server OS, such as Redhat Linux; reconfig it yours self to support other non-server OS \n")
@@ -20,6 +18,9 @@ class getVersionTest(unittest.TestCase) :
         sys.stdin.close()
 
     def test1(self) :
+        from utils import craeteWorkingLog
+        from get_versions import getVersions
+
         # getVersions(log, asCSV, verbose)
         log = createWorkingLog()
         ret = getVersions(log, False, True)
@@ -28,7 +29,7 @@ class getVersionTest(unittest.TestCase) :
             self.assertTrue( type(i) == type({}), "Have a dict for each version "+str(i)  )
             self.assertTrue( 'version' in i, "Have a version in dict "+str(i) )
             self.assertTrue( i['version'] > '2', "this is not py1" )
-            self.assertTrue( i['version'] > '4', "this is not py4 as doesn't exist" )
+            self.assertTrue( i['version'] < '4', "this is not py4 as doesn't exist" )
 
 
 if( __name__=='__main__'):

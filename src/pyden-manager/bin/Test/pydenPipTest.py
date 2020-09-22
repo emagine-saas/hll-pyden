@@ -19,26 +19,32 @@ class pydenPipTest(unittest.TestCase) :
         sys.stdin.close()
 
     def test1(self): 
+        from utils import createWorkingLog
+        from pyden_pip import pydenPip
+
         # def pydenPip(log, asCSV, sysargs, verbose) ->int:
         log = createWorkingLog()
-        fakeArgs=['scriptname', 'install', 'reqererwer']
+        fakeArgs=['bin/pyden_pip.py', 'install', 'reqererwer']
         ret=pydenPip(log, False, fakeArgs, True)
         self.assertTrue( ret >0, "Shouldn't be able to install made up package "+ret )
 
-        fakeArgs=['scriptname', 'install', 'requests']
+        fakeArgs=['bin/pyden_pip.py', 'install', 'requests']
         ret=pydenPip(log, False, fakeArgs, True)
         self.assertTrue( ret ==0, "Should be able to install acul package "+ret )
 
     def test2(self): 
-        fakeArgs=['scriptname', 'environment=TEST11111', 'install', 'requests']
+        from utils import createWorkingLog
+        from pyden_pip import pydenPip
+
+        fakeArgs=['bin/pyden_pip.py', 'environment=TEST11111', 'install', 'requests']
         ret=pydenPip(log, False, fakeArgs, True)
         self.assertTrue( ret >0, "Shouldn't be able to install made up venv "+ret )
 
-        fakeArgs=['scriptname', 'environment=timesuite', 'install', 'requests']
+        fakeArgs=['bin/pyden_pip.py', 'environment=timesuite', 'install', 'requests']
         ret=pydenPip(log, False, fakeArgs, True)
         self.assertTrue( ret ==0, "Should be abe to install to real one "+ret )
 
-        fakeArgs=['scriptname', 'environment=timesuite', 'install', '--upgrade' 'pip']
+        fakeArgs=['bin/pyden_pip.py', 'environment=timesuite', 'install', '--upgrade' 'pip']
         ret=pydenPip(log, False, fakeArgs, True)
         self.assertTrue( ret ==0, "Compound statement from manual that is probably used by all "+ret )
 

@@ -4,8 +4,6 @@
 import os
 import sys
 import unittest
-from util import createWorkingLog
-from get_venvs import getVEnvs
 
 if os.name != "posix":
     # see below paths...
@@ -21,6 +19,9 @@ class getPackagesTest(unittest.TestCase) :
         sys.stdin.close()
 
     def test1(self):
+        from utils import createWorkingLog
+        from get_venvs import getVEnvs
+
         # assumes a standard inatall has already happened
         log=createWorkingLog()
         ret=getVEnvs(log, False, True)

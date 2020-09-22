@@ -4,6 +4,7 @@
 import os
 import sys
 import unittest
+
 if os.name != "posix":
     # see below paths...
     sys.stderr.write("Test is setup for a server OS, such as Redhat Linux; reconfig it yours self to support other non-server OS \n")
@@ -18,13 +19,13 @@ class getPackagesTest(unittest.TestCase) :
         sys.stdin.close()
 
     def test1(self):
-        from utils import get_proxies
+        from utils import get_proxies, createWorkingLog
         proxies = get_proxies(None)
 # in this case this is expected to be {}, as nothing was supplied over the ENV
         self.assertTrue( proxies != False and proxies != None)
 
     def test2(self):
-        from utils import get_proxies
+        from utils import get_proxies, createWorkingLog
         proxies = get_proxies(None)
         from get_packages import get_simple_index, get_package_description, getPackages
         ret=get_simple_index(proxies) 
@@ -39,7 +40,7 @@ class getPackagesTest(unittest.TestCase) :
                 print("Whine, bad package name: "+ix['package'])          
 
     def test3(self):
-        from utils import get_proxies
+        from utils import get_proxies, createWorkingLog
         proxies = get_proxies(None)
         from get_packages import get_simple_index, get_package_description, getPackages
         ret= get_package_description("numpy", proxies) 
@@ -51,7 +52,7 @@ class getPackagesTest(unittest.TestCase) :
             self.assertTrue( len(ix['description'])>3, "the description has content"  )
 
     def test4(self):
-        from utils import get_proxies
+        from utils import get_proxies, createWorkingLog
         proxies = get_proxies(None)
         from get_packages import get_simple_index, get_package_description, getPackages
         ret= getPackages(["", "numpy"], False) 
@@ -63,7 +64,7 @@ class getPackagesTest(unittest.TestCase) :
             self.assertTrue( len(ix['description'])>3, "the description has content"  )
 
     def test5(self):
-        from utils import get_proxies
+        from utils import get_proxies, createWorkingLog
         proxies = get_proxies(None)
         from get_packages import get_simple_index, get_package_description, getPackages
         ret= getPackages(["", "pypi_simple_index"], False) 

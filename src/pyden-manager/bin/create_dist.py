@@ -78,7 +78,7 @@ def build_dist(version, download, log, proxies, asCSV, session_key):
         log.warning("Requested to install version of python already present "+version)
         if asCSV:
             Intersplunk.generateErrorResults("Version already exists.")
-        sys.exit(6)
+        return 6
     build_path = os.path.join(os.getcwd(), 'build')
     if not os.path.isdir(build_path):
         os.mkdir(build_path)
@@ -107,7 +107,7 @@ def build_dist(version, download, log, proxies, asCSV, session_key):
         log.error("Source archive is malformed (multiple project roots?)")
         if asCSV:
             Intersplunk.generateErrorResults("Aborting: Python source archive contained more than one project root. ")
-        sys.exit(7)
+        return 7
 
     # configure and build
     pyden_prefix = os.path.join(pyden_location, 'local', 'lib', 'dist', version)
@@ -141,7 +141,7 @@ def build_dist(version, download, log, proxies, asCSV, session_key):
         if asCSV:
             Intersplunk.generateErrorResults("Configure returned "+str(make.returncode )+", aborting.")
 
-        sys.exit(8)
+        return 8
     log.debug("Making new python")
     make = subprocess.Popen(['make', '-j', '8'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True,
                             env=os.environ)
@@ -156,7 +156,7 @@ def build_dist(version, download, log, proxies, asCSV, session_key):
         log.error("Make returned exit code "+str(make.returncode))
         if asCSV:
             Intersplunk.generateErrorResults("Make returned "+str(make.returncode )+", aborting.")
-        sys.exit(9)
+        return 9
     log.debug("Running make install ")
     install = subprocess.Popen(['make', 'altinstall'], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                universal_newlines=True, env=os.environ)
@@ -171,7 +171,7 @@ def build_dist(version, download, log, proxies, asCSV, session_key):
         log.error("Install returned exit code "+str(install.returncode))
         if asCSV:
             Intersplunk.generateErrorResults("Install step returned "+str(install.returncode )+", aborting.")
-        sys.exit(10)
+        return 10
     log.debug("Determining binary of " + str(pyden_prefix))
     bin_dir = os.path.join(pyden_prefix, 'bin')
     os.chdir(bin_dir)
@@ -201,7 +201,7 @@ def build_dist(version, download, log, proxies, asCSV, session_key):
         log.error("pip install returned exit code "+str(pip.returncode))
         if asCSV:
             Intersplunk.generateErrorResults("pip Install step returned "+str(pip.returncode )+", aborting.")
-        sys.exit(11)
+        return 11
  
     pip = subprocess.Popen([py_exec, '-m', 'pip', 'install', 'virtualenv'], stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE, universal_newlines=True, env=os.environ)
@@ -216,7 +216,7 @@ def build_dist(version, download, log, proxies, asCSV, session_key):
         log.error("pip install returned exit code "+str(pip.returncode))
         if asCSV:
             Intersplunk.generateErrorResults("pip Install step returned "+str(pip.returncode )+", aborting.")
-        sys.exit(12)
+        return 12
  
     log.info("Finished building Python {}. Distribution available at {}.".format(version, pyden_prefix))
 
