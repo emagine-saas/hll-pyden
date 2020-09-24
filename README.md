@@ -12,7 +12,8 @@ Interim notes (so I dont forget; I will tidyup this text at the end):
 * This means there is no need to have a session cookie; so you can now run the tool from the CLI.   
 * First author doesnt believe in accessible repos, he says; so my fixes remain here (rather than merged into his repo)
 * Swap out deprecated API (eg ConfigParser)
-* Tests are comming...
+* Tests are comming...  UPDATE: I pushed some tests, extra commit soon, which will include test env reset
+* As the tests affect the filesystem, test *must* be run in series. 
 
 original text:
 ## Overview 
