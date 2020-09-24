@@ -118,8 +118,9 @@ def build_dist(version, download, log, proxies, asCSV, session_key):
 
     optimize = '--enable-optimizations' if optimize_conf in ['true', 'True', '1', 1] else ''
     # remove environment variables. needed to use host libraries instead of splunk's built-in.
-    del os.environ['LD_LIBRARY_PATH']
-    del os.environ['OPENSSL_CONF']
+    if 'LD_LIBRARY_PATH' in os.environ:
+        del os.environ['LD_LIBRARY_PATH']
+        del os.environ['OPENSSL_CONF']
     if 'PYTHONPATH' in os.environ:
         del os.environ['PYTHONPATH']
     log.debug("Configuring source "+os.path.join(os.curdir, 'configure'))

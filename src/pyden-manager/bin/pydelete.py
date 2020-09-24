@@ -23,7 +23,7 @@ def setup( log, sysargs, pm_config, config ) ->dict:
     name = sysargs[1]
     if name not in config.sections():
         log.error("delete FAIL: First param '"+name+"' doesn't seem to be installed here (conf).")
-        return {'exit':2, 'dir':local_dir, 'dist':None, 'venv':None}
+        return {'exit':2, 'dir':local_dir, 'dist':None, 'venv':None, 'pytype':None, 'conf':None}
     pytype = False
     dist_dir = os.path.join(local_dir, 'lib', 'dist')
     venv_dir = os.path.join(local_dir, 'lib', 'venv')
@@ -33,24 +33,23 @@ def setup( log, sysargs, pm_config, config ) ->dict:
         pytype = "venv"
     if not pytype:
         log.error("delete FAIL: First param '"+name+"' doesn't seem to be installed here (FS).")
-        return { 'exit':3, 'dir':local_dir, 'dist':None, 'venv':None}
-    return { 'exit':0, 'dir':local_dir, 'dist':dist_dir, 'venv':venv_dir, 'remove':name}
+        return { 'exit':3, 'dir':local_dir, 'dist':None, 'venv':None, 'pytype':None, 'conf':None }
+    return { 'exit':0, 'dir':local_dir, 'dist':dist_dir, 'venv':venv_dir, 'remove':name, 'pytype':pytype, 'conf':local_conf }
 
 
 def pyDelete(log, values, config) ->int:
     config.remove_section( values['remove'])
 
-    if not os.path.isdir(local_dir):
-        os.mkdir(local_dir)
-    shutil.rmtree(os.path.join(local_dir, 'lib', pytype, values['remove']), False, whine )
+    if  os.path.isdir( values['dir']):
+        shutil.rmtree(os.path.join( values['dir'], 'lib', values['pytype'], values['remove']), False, whine )
 
-    if pytype == 'dist':
+    if values['pytype'] == 'dist':
         pytype='distribution'
     else:
         pytype='environment'
     config.remove_option('default-pys', pytype)
 
-    with open(local_conf, 'w+') as configfile:
+    with open( values['conf'], 'w+') as configfile:
         config.write(configfile)
 
     log.error("[unless this message is after errors] Successfully deleted "+ values['remove'])

@@ -39,6 +39,7 @@ class pyDeleteTest(unittest.TestCase) :
         ret=createDist(log, fakeArgs, False )
         self.assertTrue(ret==0, "Failed to install; to be able to delete "+str(ret) )
         
+        fakeArgs=["scriptname", "3.5.1"] 
         pm_config, config = load_pyden_config()
         values=setup(log, fakeArgs, pm_config, config )
         self.assertTrue(values['exit']==0, "Expected fail outcome "+str(values['exit'] ))
