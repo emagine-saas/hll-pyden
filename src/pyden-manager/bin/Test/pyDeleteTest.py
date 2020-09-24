@@ -19,23 +19,23 @@ class pyDeleteTest(unittest.TestCase) :
 
     def test1(self):    
         from utils import createWorkingLog, load_pyden_config
-        from pydelete import  setup, pyDelete
+        from pyden_delete import  setup, pyDelete
 
-        fakeArgs=[ "bin/pydelete.py", "2.7.20" ]
+        fakeArgs=[ "bin/pyden_delete.py", "2.7.20" ]
         log=createWorkingLog()
         pm_config, config = load_pyden_config()
         values=setup(log, fakeArgs, pm_config, config )
         self.assertTrue(values['exit']!=0, "Expected fail outcome "+str(values['exit']) )
 
-        fakeArgs=[ "bin/pydelete.py", "3.5.1" ] 
+        fakeArgs=[ "bin/pyden_delete.py", "3.5.1" ] 
         self.assertTrue(values['exit']!=0, "Expected fail outcome "+str(values['exit']) )
 
     def test2(self):    
         from utils import createWorkingLog, load_pyden_config
-        from pydelete import  setup, pyDelete
+        from pyden_delete import  setup, pyDelete
         from create_dist import createDist
         log=createWorkingLog()
-        fakeArgs=['bin/pydelete.py', 'version=3.5.1', '--no-block']
+        fakeArgs=['bin/pyden_delete.py', 'version=3.5.1', '--no-block']
         ret=createDist(log, fakeArgs, False )
         self.assertTrue(ret==0, "Failed to install; to be able to delete "+str(ret) )
         
