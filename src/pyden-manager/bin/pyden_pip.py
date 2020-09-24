@@ -1,10 +1,16 @@
 import sys
 import subprocess
-from splunk import Intersplunk
 from utils import load_pyden_config, get_proxies, pyden_env, createWorkingLog
 import os
 if sys.version > '3':
     from importlib import reload
+if sys.version < '3':
+    from HTMLParser import HTMLParser
+    sys.path.append( os.environ['SPLUNK_HOME']+os.sep+ 'lib' +os.sep+'python2.7'+os.sep+'site-packages' + os.sep+'splunk'+os.sep)
+else:
+    from html.parser import HTMLParser
+    sys.path.append( os.environ['SPLUNK_HOME']+os.sep+ 'lib' +os.sep+'python3.7'+os.sep+'site-packages' + os.sep+'splunk'+os.sep)
+from splunk import Intersplunk
 
 confFile=False
 if sys.argv[-1].startswith("conf="):

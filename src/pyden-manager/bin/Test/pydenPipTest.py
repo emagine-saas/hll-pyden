@@ -4,7 +4,7 @@
 import os
 import sys
 import unittest
-import pydenPip
+
 if os.name != "posix":
     # see below paths...
     sys.stderr.write("Test is setup for a server OS, such as Redhat Linux; reconfig it yours self to support other non-server OS \n")

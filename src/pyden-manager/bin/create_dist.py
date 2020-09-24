@@ -223,7 +223,7 @@ def build_dist(version, download, log, proxies, asCSV, session_key):
     write_pyden_config(pyden_location, config, version, "executable", py_exec.lstrip(os.environ['SPLUNK_HOME']))
     if not config.has_section("default-pys") or not config.has_option("default-pys", "distribution"):
         write_pyden_config(pyden_location, config, 'default-pys', 'distribution', version)
-    return
+    return 0
 
 def createDist(log, sysargs, asCSV ):
     download_arg = True

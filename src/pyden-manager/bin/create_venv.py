@@ -36,6 +36,7 @@ def getBtoolConfig():
     return proc_out.decode()
 
 def setup(log, sysargs):
+    args={}
     for arg in sysargs[1:]:
         try:
             if "reloaded" in arg:
@@ -44,13 +45,13 @@ def setup(log, sysargs):
             args[k] = v
         except ValueError:
             log.error("Incorrect argument format provided: "+str(sysargs))
-            return [2, "Incorrect argument format provided."]
+            return [2, "Incorrect argument format provided.",  "", "", "" ]
 
     pm_config, config = load_pyden_config()
     pyden_location = pm_config.get('appsettings', 'location')
     if 'name' not in args:
         log.error("No name param for the new environment was provided.")
-        return [3, "No name param for the new environment was provided."]
+        return [3, "No name param for the new environment was provided.", "", "", ""]
 
     # get executable
     version = args.get('version')
@@ -61,23 +62,23 @@ def setup(log, sysargs):
     log.debug("Understood request as create venv for "+str(name)+" "+str(version)+".")
     if version in config.sections():
         py_exec = os.path.join(os.environ['SPLUNK_HOME'], config.get(version, 'executable'))
-        return [0, py_exec]
+        return [0, py_exec, pyden_location, name, version]
     else:
         log.error("Unknown Python version "+str(version)+" (looking at pyden.conf).")
-        return [4, "Unknown Python version (looking at pyden.conf)."]
+        return [4, "Unknown Python version (looking at pyden.conf).", "", "", ""]
 
-def createVenv(log  ):
+def createVenv(log, binary, where, name, version ):
     pm_config, config = load_pyden_config()
     if not config.has_option("default-pys", "environment"):
-        write_pyden_config(pyden_location, config, 'default-pys', 'environment', name)
+        write_pyden_config(where, config, 'default-pys', 'environment', name)
 
-    venv_dir = os.path.join(pyden_location, 'local', 'lib', 'venv')
+    venv_dir = os.path.join(where, 'local', 'lib', 'venv')
     if not os.path.isdir(venv_dir):
         os.makedirs(venv_dir)
     os.chdir(venv_dir)
 
-    venv = subprocess.Popen([py_exec, '-m', "virtualenv", name], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                            universal_newlines=True)
+    venv = subprocess.Popen([binary, '-m', "virtualenv", name], stdout=subprocess.PIPE, 
+		stderr=subprocess.PIPE, universal_newlines=True)
     result, error = venv.communicate()
     for message in result.split('\n'):
         if message:
@@ -92,23 +93,28 @@ def createVenv(log  ):
             Intersplunk.generateErrorResults( "Sub process return value "+venv.returncode+" isn't valid (did something crash?)." )
         return 5
     venv_exec = os.path.join(venv_dir, name, 'bin', 'python')
-    write_pyden_config(pyden_location, config, name, "executable", venv_exec.lstrip(os.environ['SPLUNK_HOME']))
-    write_pyden_config(pyden_location, config, name, 'version', version)
+    write_pyden_config(where, config, name, "executable", venv_exec.lstrip(os.environ['SPLUNK_HOME']))
+    write_pyden_config(where, config, name, 'version', version)
     log.info("Successfully created venv ")
     if sys.version_info[0] > 2:
         from splunk import Intersplunk
         Intersplunk.addErrorMessage({}, "Everything is OK")
         Intersplunk.outputResults( [ ])
-
+    return 0
 
 if __name__ == "__main__":
     log = createWorkingLog()
-    ret, text=setup(log, sys.argv)
+    ret, binary, predictableLocation, venvname, venvversion=setup(log, sys.argv)
     if ret != 0 and sys.version_info[0] > 2:
         from splunk import Intersplunk
         Intersplunk.generateErrorResults(text )
+        sys.exit(ret)
+
     elif ret == 0:
-        pydenFork(text, log, sys.argv)
-        createVenv(log )
-
-
+        pydenFork(binary, log, sys.argv)
+        ret=createVenv(log, binary, predictableLocation, venvname, venvversion )
+        sys.exit(ret)
+    else: # somehow using py2
+        sys.exit(ret)
+      
+    

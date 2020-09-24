@@ -18,7 +18,7 @@ class getVersionTest(unittest.TestCase) :
         sys.stdin.close()
 
     def test1(self) :
-        from utils import craeteWorkingLog
+        from utils import createWorkingLog
         from get_versions import getVersions
 
         # getVersions(log, asCSV, verbose)
