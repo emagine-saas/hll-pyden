@@ -14,7 +14,7 @@ My fork of pyden suite does work with splunk 8.0.1, 8.0.2 and 8.0.3, signed "me"
 * `../../../bin/splunk cmd python3 ./bin/Test/$filename`
 * NB: Tests must be run sequentialy; as they each alter the filesystem
 * As I can't see alot of develoment happening on this; I haven't added any type of wrapper to run all of them in one go
-* NB2: build140 includes server reset (aside from the config); so tests can be run multiple times
+* NB2: build140 and up includes test env reset in the tests (aside from the config); so tests can be run multiple times
 
 ## tech errata, the python3 branch is:
 * The original usage syntax (as below) is preserved, as its not valuable to change it.
