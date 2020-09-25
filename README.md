@@ -21,10 +21,11 @@ My fork of pyden suite does work with splunk 8.0.1, 8.0.2 and 8.0.3, signed "me"
 * Adding support for python3.   Mostly still support for py2; but some comnmands will fail.
 * Write necessary API changes for newer python, in addition to previous.
 * Remove the "can store any config setting in any file" thing that splunk likes.
-* Edit code, so the modules can be imported as //modules//; remove random things from global scope
+* Edit code, so the modules can be imported as ''modules''; remove random things from global scope
 * Make logging work, correctly; compliant to python standards.  These are not likely to be scripts that runs often (guess once per server); so tight integration with Splunk events isn't interesting
 * Improve file naming scheme
-* ... tests as above
+* Removed some fork/exec calls, as unnecessary and overly-complicated (may be needed in py2 though)
+* ... tests as above 
 
 
 
