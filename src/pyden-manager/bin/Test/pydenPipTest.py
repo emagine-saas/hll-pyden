@@ -36,11 +36,11 @@ class pydenPipTest(unittest.TestCase) :
 
         # def pydenPip(log, asCSV, sysargs, verbose) ->int:
         log = createWorkingLog()
-        fakeArgs=['bin/pyden_pip.py', 'install', 'reqererwer']
+        fakeArgs=['bin/pyden_pip.py','environment=timesuite', 'install', 'reqererwer', 'conf=/opt/splunk/etc/apps/timesuite/default/pyden-env.conf' ]
         ret=pydenPip(log, False, fakeArgs, True)
         self.assertTrue( ret >0, "Shouldn't be able to install made up package "+str(ret) )
 
-        fakeArgs=['bin/pyden_pip.py', 'install', 'requests']
+        fakeArgs=['bin/pyden_pip.py','environment=timesuite', 'install', 'requests', 'conf=/opt/splunk/etc/apps/timesuite/default/pyden-env.conf' ]
         ret=pydenPip(log, False, fakeArgs, True)
         self.assertTrue( ret ==0, "Should be able to install actual package "+str(ret) )
 

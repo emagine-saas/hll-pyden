@@ -24,6 +24,6 @@ def getVEnvs(log, asCSV, verbose ):
 
 
 if __name__ == "__main__":
-    logger = createWorkingLogging()
+    logger = createWorkingLog()
     getVEnvs(logger, True, True )
 

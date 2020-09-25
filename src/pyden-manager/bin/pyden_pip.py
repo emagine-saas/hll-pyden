@@ -43,13 +43,15 @@ def pydenPip(log, asCSV, sysargs, verbose) ->int:
     pyden_location = pm_config.get('appsettings', 'location')
     env = False
     pip_arg_index = 1
+    conf_arg_index=1
     if config.has_option('default-pys', 'environment'):
         env = config.get('default-pys', 'environment')
     for key, val in enumerate(sysargs):
         if 'environment' in val:
             env = val.split('=')[1]
             pip_arg_index = key +1 # needs to be after this item
-            break
+        if 'conf' in val:
+            conf_arg_index = key 
 
     if not env:
         log.warning("pip, invoked with empty env, CRASH!")
@@ -61,19 +63,29 @@ def pydenPip(log, asCSV, sysargs, verbose) ->int:
 
 #    pipExec(py_exec, log, sysargs, asCSV)
 # This output is inherited from the original code base; its not great for unit tests
-    sys.stdout.write("messages\n")
-    sys.stdout.flush()
-    pip = subprocess.call([py_exec, '-m', 'pip'] + sysargs[pip_arg_index:])
-    if pip != 0:
-        log.error("Pip exit status was non-zero "+str(pip))
+#    sys.stdout.write("messages\n")
+#    sys.stdout.flush()
+    try:
+        verbose and log.debug("pyden pip started ")
+        out = subprocess.check_output([py_exec, '-m', 'pip'] + sysargs[pip_arg_index:conf_arg_index ], stderr=subprocess.STDOUT, timeout=10 )
+        verbose and log.debug("pyden pip completed ")
+        log.error("PIP output "+ out.decode())
         if asCSV:
-            Intersplunk.generateErrorResults("[the real] Pip failed returned error "+str(pip) )
+            Intersplunk.generateErrorResults("[the real pip]: library  is installed " )
+        return 0
+#
+
+    except BaseException as e:
+        log.error("[the real] Pip failed returned error "+str(e) )
+        if type(out) != type(None): 
+            log.error("[the real] Pip failed returned error "+str(out) )
+        if asCSV:
+            Intersplunk.generateErrorResults("[the real] Pip failed returned error "+str(out) )
         return 3
-    verbose and log.debug("pyden pip completed ")
-    return 0
 
 
 if __name__ == "__main__":
+    sys.stdin.close()
 # with an object to maintain state, I can skip alot of these args on the sideEffect functions.
     log = createWorkingLog()
     sys.exit(pydenPip(log, True, sys.argv, False ))
