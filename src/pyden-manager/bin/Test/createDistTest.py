@@ -11,11 +11,22 @@ if os.name != "posix":
 
 class createDistTest(unittest.TestCase) :
     def setUp(self):
-        sys.path.append('/opt/splunk/etc/apps/pyden-manager/bin/')
-        sys.path.append('/opt/splunk/etc/apps' +os.sep+"pyden"+os.sep+"local"+os.sep+ "lib"+os.sep+"venv"+os.sep+ "timesuite"+os.sep+"lib"+os.sep+"python3.7"+os.sep+"site-packages" )
-        sys.path.append( '/opt/splunk/lib/python3.7/site-packages')
-        sys.path.append( '/opt/splunk/lib/python3.7/site-packages/splunk/')
+        sys.path.append( os.sep+"opt"+os.sep+"splunk"+os.sep+"etc"+os.sep+"apps"+os.sep+"pyden-manager"+os.sep+"bin"+os.sep )
+        sys.path.append( os.sep+"opt"+os.sep+"splunk"+os.sep+"etc"+os.sep+"apps" +os.sep+"pyden"+os.sep+"local"+os.sep+ "lib"+os.sep+"venv"+os.sep+ "timesuite"+os.sep+"lib"+os.sep+"python3.7"+os.sep+"site-packages" )
+        sys.path.append( os.sep+"opt"+os.sep+"splunk"+os.sep+"lib"+os.sep+"python3.7"+os.sep+"site-packages" )
+        sys.path.append( os.sep+"opt"+os.sep+"splunk"+os.sep+"lib"+os.sep+"python3.7"+os.sep+"site-packages"+os.sep+"splunk"+os.sep )
         sys.stdin.close()
+
+    def tearDown(self):
+#        ret=createDist(log, ["scriptname", "version=3.5.4", "--no-block"], True)
+#        cmd='"+os.sep+"opt"+os.sep+"splunk"+os.sep+"etc"+os.sep+"apps"+os.sep+"pyden"+os.sep+"local"+os.sep+"lib"+os.sep+"venv"+os.sep+"timesuite"+os.sep+"bin"+os.sep+"pip3'
+        if os.path.isdir( ""+os.sep+"opt"+os.sep+"splunk"+os.sep+"etc"+os.sep+"apps"+os.sep+"pyden"+os.sep+"local"+os.sep+"lib"+os.sep+"venv"+os.sep+"pyjamas"):
+            shutil.rmtree( ""+os.sep+"opt"+os.sep+"splunk"+os.sep+"etc"+os.sep+"apps"+os.sep+"pyden"+os.sep+"local"+os.sep+"lib"+os.sep+"venv"+os.sep+"pyjamas", False, whine )
+        if os.path.isdir( ""+os.sep+"opt"+os.sep+"splunk"+os.sep+"etc"+os.sep+"apps"+os.sep+"pyden"+os.sep+"local"+os.sep+"lib"+os.sep+"dist"+os.sep+"3.5.2"):
+            shutil.rmtree( ""+os.sep+"opt"+os.sep+"splunk"+os.sep+"etc"+os.sep+"apps"+os.sep+"pyden"+os.sep+"local"+os.sep+"lib"+os.sep+"dist"+os.sep+"3.5.2", False, whine )
+        if os.path.isdir( ""+os.sep+"opt"+os.sep+"splunk"+os.sep+"etc"+os.sep+"apps"+os.sep+"pyden"+os.sep+"local"+os.sep+"lib"+os.sep+"dist"+os.sep+"3.5.3"):
+            shutil.rmtree( ""+os.sep+"opt"+os.sep+"splunk"+os.sep+"etc"+os.sep+"apps"+os.sep+"pyden"+os.sep+"local"+os.sep+"lib"+os.sep+"dist"+os.sep+"3.5.3", False, whine )
+        print("pls tidyup config file "+os.sep+"opt"+os.sep+"splunk"+os.sep+"etc"+os.sep+"apps"+os.sep+"pyden"+os.sep+"local"+os.sep+"pyden.conf")
 
     def test1(self) :
         from utils import createWorkingLog

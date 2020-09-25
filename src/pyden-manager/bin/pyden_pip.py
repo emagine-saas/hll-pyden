@@ -10,7 +10,7 @@ if sys.version < '3':
 else:
     from html.parser import HTMLParser
     sys.path.append( os.environ['SPLUNK_HOME']+os.sep+ 'lib' +os.sep+'python3.7'+os.sep+'site-packages' + os.sep+'splunk'+os.sep)
-from splunk import Intersplunk
+import Intersplunk
 
 confFile=False
 if sys.argv[-1].startswith("conf="):
@@ -48,7 +48,7 @@ def pydenPip(log, asCSV, sysargs, verbose) ->int:
     for key, val in enumerate(sysargs):
         if 'environment' in val:
             env = val.split('=')[1]
-            pip_arg_index = key
+            pip_arg_index = key +1 # needs to be after this item
             break
 
     if not env:
@@ -59,10 +59,11 @@ def pydenPip(log, asCSV, sysargs, verbose) ->int:
     py_exec = os.path.join(os.environ['SPLUNK_HOME'], config.get(env, 'executable'))
     verbose and log.debug("pip using "+py_exec+"/python interpreter")
 
-    pipExec(py_exec, log, sysargs, asCSV)
+#    pipExec(py_exec, log, sysargs, asCSV)
+# This output is inherited from the original code base; its not great for unit tests
     sys.stdout.write("messages\n")
     sys.stdout.flush()
-    pip = subprocess.call([py_exec, '-m', 'pip'] + sysargs[pip_arg_index:-1])
+    pip = subprocess.call([py_exec, '-m', 'pip'] + sysargs[pip_arg_index:])
     if pip != 0:
         log.error("Pip exit status was non-zero "+str(pip))
         if asCSV:

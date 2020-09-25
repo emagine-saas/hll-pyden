@@ -12,10 +12,10 @@ if os.name != "posix":
 
 class getPackagesTest(unittest.TestCase) :
     def setUp(self):
-        sys.path.append('/opt/splunk/etc/apps/pyden-manager/bin/')
-        sys.path.append('/opt/splunk/etc/apps' +os.sep+"pyden"+os.sep+"local"+os.sep+ "lib"+os.sep+"venv"+os.sep+ "timesuite"+os.sep+"lib"+os.sep+"python3.7"+os.sep+"site-packages" )
-        sys.path.append( '/opt/splunk/lib/python3.7/site-packages')
-        sys.path.append( '/opt/splunk/lib/python3.7/site-packages/splunk/')
+        sys.path.append(os.sep+"opt"+os.sep+"splunk"+os.sep+"etc"+os.sep+"apps"+os.sep+"pyden-manager"+os.sep+"bin"+os.sep )
+        sys.path.append( os.sep+"opt"+os.sep+"splunk"+os.sep+"etc"+os.sep+"apps" +os.sep+"pyden"+os.sep+"local"+os.sep+ "lib"+os.sep+"venv"+os.sep+ "timesuite"+os.sep+"lib"+os.sep+"python3.7"+os.sep+"site-packages" )
+        sys.path.append( os.sep+"opt"+os.sep+"splunk"+os.sep+"lib"+os.sep+"python3.7"+os.sep+"site-packages")
+        sys.path.append( os.sep+"opt"+os.sep+"splunk"+os.sep+"lib"+os.sep+"python3.7"+os.sep+"site-packages"+os.sep+"splunk"+os.sep )
         sys.stdin.close()
 
     def test1(self):
