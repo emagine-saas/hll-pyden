@@ -1,3 +1,36 @@
+# ob1 remix
+This is a work related code dump.  As the original version is MIT licenced, it will be a pain if it lives on the company repo (open source code, but closed code storage is not good); so its sat here.   The original version doesn't ship with any tests;  
+Secondly, the original version; written before splunk8, doesn't work with python3/splunk8.  The reason this branch exists, is to allow my employer to **use python3**, like a normal person.
+My fork of pyden suite does work with splunk 8.0.1, 8.0.2 and 8.0.3, signed "me".   I do not issue the same statement about the py3 version that the first author made; and has uploaded to the splunk app shop.
+
+## howto: Tests
+* setup up a basic splunk node (suggest a Linux for cost reasons)
+* install this app and the "pyden" one via the GUI
+* in the GUI ensure you have made the config file after splunk restarts (it will prompt you)
+* open a bash terminal on the server (suggest SSH, unless you installed locally)
+* force python3 via the option in `/opt/splunk/etc/local/server.conf` and restart splunk to make enabled
+* `cd /opt/splunk/etc/apps/pyden-manager`
+* `ls bin/Test`   - this will show you a list of tests.
+* `../../../bin/splunk cmd python3 ./bin/Test/$filename`
+* NB: Tests must be run sequentialy; as they each alter the filesystem
+* As I can't see alot of develoment happening on this; I haven't added any type of wrapper to run all of them in one go
+* NB2: build140 includes server reset (aside from the config); so tests can be run multiple times
+
+## tech errata, the python3 branch is:
+* The original usage syntax (as below) is preserved, as its not valuable to change it.
+* Adding support for python3.   Mostly still support for py2; but some comnmands will fail.
+* Write necessary API changes for newer python, in addition to previous.
+* Remove the "can store any config setting in any file" thing that splunk likes.
+* Edit code, so the modules can be imported as //modules//; remove random things from global scope
+* Make logging work, correctly; compliant to python standards.  These are not likely to be scripts that runs often (guess once per server); so tight integration with Splunk events isn't interesting
+* ... tests as above
+
+
+
+
+
+original text:
+
 # Overview 
 The goal of this application is to provide full Python functionality to Splunk. Currently, the Python distribution built in to Splunk runs on a version 2.7.x depending on the Splunk version. Additionally, there are significant core modules that are excluded in this distribution. This suite of apps will allow developers to create Python virtual environments and pick the Python version and modules installed to the environment. This includes core distributions of the interpreter in multiple 2.7.x and 3.5+ versions, as well as the use of pip for the installation of additional modules within a virtual environment.
 
