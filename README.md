@@ -10,7 +10,7 @@ My fork of pyden suite does work with splunk 8.0.1, 8.0.2 and 8.0.3, signed "me"
 * open a bash terminal on the server (suggest SSH, unless you installed locally)
 * force python3 via the option in `/opt/splunk/etc/local/server.conf` and restart splunk to make enabled
 * `cd /opt/splunk/etc/apps/pyden-manager`
-`ls bin/Test`   - this will show you a list of tests.
+* `ls bin/Test`   - this will show you a list of tests.
 * `../../../bin/splunk cmd python3 ./bin/Test/$filename`
 * NB: Tests must be run sequentialy; as they each alter the filesystem
 * As I can't see alot of develoment happening on this; I haven't added any type of wrapper to run all of them in one go
