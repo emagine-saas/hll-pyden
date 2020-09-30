@@ -26,8 +26,8 @@ My fork of pyden suite does work with splunk 8.0.1, 8.0.2 and 8.0.3, signed "me"
 * Improve file naming scheme
 * Removed some fork/exec calls, as unnecessary and overly-complicated (may be needed in py2 though)
 * ... tests as above 
-
-
+* Would like to make more readable by converting to objects, but not worth time (see expected use) 
+* Note: if a script is run, but seems to hang, the inherited code is trying to pull security details from splunk REST API, and its blocked.  Add --no-block to just read from local filesystem (unit tests always set this).
 
 
 
