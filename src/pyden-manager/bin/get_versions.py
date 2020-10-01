@@ -12,7 +12,7 @@ def getVersions(log, asCSV, verbose):
     if asCSV:
         proxies = get_proxies(None)
         download_url = simpleRequest("/servicesNS/nobody/pyden-manager/properties/pyden/download/url",
-                                 sessionKey=session_key)[1]
+                                 sessionKey=proxies['session_key'])[1]
     else:
         download_url = readConfig('download', 'url')
         
@@ -48,6 +48,11 @@ def getVersions(log, asCSV, verbose):
 
 if __name__ == "__main__":
     logger = createWorkingLog()
-    getVersions(logger, True, False)
-
+    if '--no-block' in sys.argv:
+        tt=getVersions(logger, False, False)
+        print("Version")
+        for i in tt:
+            print(i['version'])
+    else:
+        getVersions(logger, True, False)
 

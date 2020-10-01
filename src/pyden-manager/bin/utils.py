@@ -80,7 +80,8 @@ def get_proxies(session_key):
 
     proxies = {
         "http": "http://%s%s/" % (auth, proxy),
-        "https": "https://%s%s/" % (auth, proxy)
+        "https": "https://%s%s/" % (auth, proxy),
+        "session_key":session_key
     } if proxy else {}
     return proxies
 
