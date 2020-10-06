@@ -1,4 +1,5 @@
 from utils import load_pyden_config
+import sys
 from splunk import Intersplunk
 import re
 from utils import createWorkingLog
@@ -24,6 +25,13 @@ def getVEnvs(log, asCSV, verbose ):
 
 
 if __name__ == "__main__":
-    logger = createWorkingLog()
-    getVEnvs(logger, True, True )
+   logger = createWorkingLog()
+     if '--no-block' in sys.argv:
+        tt=getVEnvs(logger, False, True )
+        print("version,is_default")
+        for i in tt:
+            print(str(i['version'])+","+str(i['is_default']))
+
+    else:
+        getVEnvs(logger, True, False )
 

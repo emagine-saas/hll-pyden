@@ -59,6 +59,7 @@ def getPackages(sysargs, asCSV ):
 
 if __name__ == "__main__":
     if '--no-block' in sys.argv:
+        sys.stdin.close()
         tt=getPackages(sys.argv, False)
         print("Packages")
         for i in tt:

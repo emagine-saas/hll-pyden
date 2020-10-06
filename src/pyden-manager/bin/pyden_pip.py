@@ -43,7 +43,7 @@ def pydenPip(log, asCSV, sysargs, verbose) ->int:
     pyden_location = pm_config.get('appsettings', 'location')
     env = False
     pip_arg_index = 1
-    conf_arg_index=1
+    conf_arg_index=-1
     if config.has_option('default-pys', 'environment'):
         env = config.get('default-pys', 'environment')
     for key, val in enumerate(sysargs):
@@ -60,18 +60,20 @@ def pydenPip(log, asCSV, sysargs, verbose) ->int:
         return 2
     py_exec = os.path.join(os.environ['SPLUNK_HOME'], config.get(env, 'executable'))
     verbose and log.debug("pip using "+py_exec+"/python interpreter")
-
+    out=None
 #    pipExec(py_exec, log, sysargs, asCSV)
 # This output is inherited from the original code base; its not great for unit tests
 #    sys.stdout.write("messages\n")
 #    sys.stdout.flush()
     try:
-        verbose and log.debug("pyden pip started ")
+        if conf_arg_index < 0:
+            conf_arg_index=len(sysargs)
+        verbose and log.debug("pyden pip started "+str([py_exec, '-m', 'pip'] + sysargs[pip_arg_index:conf_arg_index ] ) )
         out = subprocess.check_output([py_exec, '-m', 'pip'] + sysargs[pip_arg_index:conf_arg_index ], stderr=subprocess.STDOUT, timeout=10 )
         verbose and log.debug("pyden pip completed ")
         log.error("PIP output "+ out.decode())
         if asCSV:
-            Intersplunk.generateErrorResults("[the real pip]: library  is installed " )
+            Intersplunk.generateErrorResults("[the real pip]: library "+str(sysargs[pip_arg_index:conf_arg_index ])+ " is installed " )
         return 0
 #
 

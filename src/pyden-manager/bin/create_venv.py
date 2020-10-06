@@ -107,11 +107,11 @@ if __name__ == "__main__":
     ret, binary, predictableLocation, venvname, venvversion=setup(log, sys.argv)
     if ret != 0 and sys.version_info[0] > 2:
         from splunk import Intersplunk
-        Intersplunk.generateErrorResults(text )
+        Intersplunk.generateErrorResults(binary )
         sys.exit(ret)
 
     elif ret == 0:
-        pydenFork(binary, log, sys.argv)
+#        pydenFork(binary, log, sys.argv)
         ret=createVenv(log, binary, predictableLocation, venvname, venvversion )
         sys.exit(ret)
     else: # somehow using py2

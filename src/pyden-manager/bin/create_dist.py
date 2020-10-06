@@ -187,7 +187,7 @@ def build_dist(version, download, log, proxies, asCSV, session_key):
     log.debug("Found python binary (will deploy pip next): "+str( py_exec))
 
     # Running get-pip and others
-    if proxies:
+    if proxies and 'http' in proxies:
         os.environ['HTTP_PROXY'] = proxies['http']
         os.environ['HTTPS_PROXY'] = proxies['https']
     pip = subprocess.Popen([py_exec, '-m', 'pip', 'install', '--upgrade', 'pip'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, env=os.environ)

@@ -13,6 +13,7 @@ def getVersions(log, asCSV, verbose):
         proxies = get_proxies(None)
         download_url = simpleRequest("/servicesNS/nobody/pyden-manager/properties/pyden/download/url",
                                  sessionKey=proxies['session_key'])[1]
+        download_url =str(download_url, 'utf-8' )
     else:
         download_url = readConfig('download', 'url')
         
