@@ -1,4 +1,4 @@
-# ob1 remix
+# ob1 remix ~ pls use python3 branch
 This is a work related code dump.  As the original version is MIT licenced, it will be a pain if it lives on the company repo (open source code, but closed code storage is not good); so its sat here.   The original version doesn't ship with any tests;  
 Secondly, the original version; written before splunk8, doesn't work with python3/splunk8.  The reason this branch exists, is to allow my employer to **use python3**, like a normal person.
 My fork of pyden suite does work with splunk 8.0.1, 8.0.2 and 8.0.3, signed "me".   I do not issue the same statement about the py3 version that the first author made; and has uploaded to the splunk app shop.
