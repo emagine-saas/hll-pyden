@@ -15,10 +15,11 @@ My fork of pyden suite does work with splunk 8.0.1, 8.0.2 and 8.0.3, signed "me"
 * NB: Tests must be run sequentialy; as they each alter the filesystem
 * As I can't see alot of develoment happening on this; I haven't added any type of wrapper to run all of them in one go
 * NB2: build140 and up includes test env reset in the tests (aside from the config); so tests can be run multiple times
+* NB3: The unit tests leak *warnings about deprecated module "imp"*.  I do not have write access to splunk inc source code, I cannot fix this.  This is upsrream of this project. 
 
 ## tech errata, the python3 branch is:
 * The original usage syntax (as below) is preserved, as its not valuable to change it.
-* *It is important to note that the Pyden workflow is not compatible with persistent splunk processes;* the implicit fork breaks communication with the main splunk process
+* **It is important to note that the Pyden workflow is not compatible with persistent splunk processes;** the implicit fork breaks communication with the main splunk process
 * Adding support for python3.   Mostly still support for py2; but some comnmands will fail.
 * Write necessary API changes for newer python, in addition to previous.
 * Make stable to run via the unit-tests, on the CLI, and via splunk (the extra access paths make the code easier to use)
