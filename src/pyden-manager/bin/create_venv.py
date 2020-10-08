@@ -1,7 +1,7 @@
 import sys
 import os
 import subprocess
-from utils import load_pyden_config, write_pyden_config, pyden_env, createWorkingLog
+from utils import load_pyden_config, write_pyden_config, pyden_env, createWorkingLog, getBtoolConfig
 if sys.version_info[0] >= 3:
     from importlib import reload
 

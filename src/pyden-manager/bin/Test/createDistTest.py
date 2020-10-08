@@ -4,10 +4,24 @@
 import os
 import sys
 import unittest
+import shutil
 if os.name != "posix":
     # see below paths...
     sys.stderr.write("Test is setup for a server OS, such as Redhat Linux; reconfig it yours self to support other non-server OS \n")
     sys.exit(1)
+
+def whine(op, fn, excInfo):
+    """
+If onerror is provided, it must be a callable that accepts three parameters: 
+   function, path, and excinfo. 
+     The first parameter, function, is the function which raised the exception; it will be os.path.islink(), os.listdir(), os.remove() or os.rmdir(). 
+     The second parameter, path, will be the path name passed to function. 
+     The third parameter, excinfo, will be the exception information return by sys.exc_info(). 
+
+Exceptions raised by onerror will not be caught.
+"""
+    print("FS Delete cmd failed on "+str(fn)+" saying "+str(excInfo))
+
 
 class createDistTest(unittest.TestCase) :
     def setUp(self):

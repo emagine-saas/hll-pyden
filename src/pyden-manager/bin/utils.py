@@ -24,11 +24,8 @@ def load_pyden_config():
 
     util_logger.debug("Loading Pyden config")
     pm_config = ConfigParser()
-    splunk_bin = os.path.join(os.environ['SPLUNK_HOME'], 'bin', 'splunk')
     util_logger.debug("Reading config from btool")
-    proc = subprocess.Popen([splunk_bin, 'btool', 'pyden', 'list'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    proc_out, proc_err = proc.communicate()
-    buf = StringIO(proc_out.decode())
+    buf = StringIO( getBtoolConfig())
     pm_config.read_file(buf, "./fakeName.conf")
     util_logger.debug("Grabbing config attributes like location")
     pyden_location = pm_config.get('appsettings', 'location')
@@ -38,6 +35,21 @@ def load_pyden_config():
     util_logger.debug("Returning writable config object")
     return pm_config, config
 
+def getBtoolConfig():
+    splunk_bin = os.path.join(os.environ['SPLUNK_HOME'], 'bin', 'splunk')
+    proc = subprocess.Popen([splunk_bin, 'btool', 'timesuite', 'list'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, )
+    proc_out, proc_err = proc.communicate()
+    return proc_out.decode()
+
+def getConf() :
+	_dir =os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))+os.sep+"pyden" 
+	cc=ConfigParser()
+	if os.path.isfile( _dir+os.sep+"local"+os.sep+"pyden.conf" ) and os.stat( _dir+os.sep+"local"+os.sep+"pyden.conf").st_size>10 :
+		cc.read( _dir+os.sep+"local"+os.sep+"pyden.conf")
+	else: 
+		# branch used when there is no current install
+		cc.read( _dir+os.sep+"default"+os.sep+"pyden.conf")
+	return cc
 
 def write_pyden_config(pyden_location, config, stanza, attribute, value):
     local_conf = os.path.join(pyden_location, 'local', 'pyden.conf')
@@ -76,7 +88,13 @@ def get_proxies(session_key):
         user, password = c['username'], c['clear_password']
 
     auth = "%s:%s@" % (user, password) if user else ""
-    proxy = load_pyden_config()[0].get('appsettings', 'proxy')
+    proxy={}
+    try:
+        tt1, tt2=load_pyden_config()
+        if len(tt1) > 0 :
+            proxy=tt1.get('appsettings', 'proxy')
+    except NoSectionError as e:
+        pass
 
     proxies = {
         "http": "http://%s%s/" % (auth, proxy),
