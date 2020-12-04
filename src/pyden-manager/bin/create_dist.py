@@ -10,7 +10,7 @@ import requests
 import re
 import sys
 import shutil
-from utils import load_pyden_config, write_pyden_config, get_proxies, createWorkingLog, readConfig
+from utils import load_pyden_config, write_pyden_config, get_proxies, createWorkingLog, readConfig, getConf
 from get_versions import getVersions
 from distutils.version import LooseVersion
 
@@ -72,8 +72,9 @@ def download_python(version, build_path, proxies, asCSV, session_key):
 
 
 def build_dist(version, download, log, proxies, asCSV, session_key):
-    pm_config, config = load_pyden_config()
-    pyden_location = pm_config.get('appsettings', 'location')
+    config =getConf()
+#    pm_config, config = load_pyden_config()
+    pyden_location = config.get('appsettings', 'location')
     if version in config.sections():
         log.warning("Requested to install version of python already present "+version)
         if asCSV:
