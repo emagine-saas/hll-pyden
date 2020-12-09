@@ -141,7 +141,7 @@ def build_dist(version, download, log, proxies, asCSV, session_key):
     if configure.returncode != 0:
         log.error("Configure returned exit code "+str(configure.returncode))
         if asCSV:
-            Intersplunk.generateErrorResults("Configure returned "+str(make.returncode )+", aborting.")
+            Intersplunk.generateErrorResults("Configure returned "+str(configure.returncode )+", aborting.")
 
         return 8
     log.debug("Making new python")

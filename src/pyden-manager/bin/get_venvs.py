@@ -36,7 +36,8 @@ if __name__ == "__main__":
         tt=getVEnvs(logger, False, True )
         print("version,is_default")
         for i in tt:
-            print(str(i['version'])+","+str(i['is_default']))
+            if 'version' in i and 'is_default' in i:
+                print(str(i['version'])+","+str(i['is_default']))
 
     else:
         getVEnvs(logger, True, False )

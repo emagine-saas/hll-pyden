@@ -28,7 +28,12 @@ def load_pyden_config():
     buf = StringIO( getBtoolConfig())
     pm_config.read_file(buf, "./fakeName.conf")
     util_logger.debug("Grabbing config attributes like location")
-    pyden_location = pm_config.get('appsettings', 'location')
+    pyden_location ='/opt/splunk/etc/apps/pyden/'
+    try:
+        pyden_location = pm_config.get('appsettings', 'location')
+    except BaseException as e:
+        util_logger.info("XXXX "+str(e))
+
     local_conf = os.path.abspath(os.path.join(pyden_location, 'local', 'pyden.conf'))
     config = ConfigParser()
     config.read([local_conf])

@@ -48,7 +48,12 @@ def setup(log, sysargs):
             return [2, "Incorrect argument format provided.",  "", "", "" ]
 
     pm_config, config = load_pyden_config()
-    pyden_location = pm_config.get('appsettings', 'location')
+    pyden_location=''
+    try:
+        pyden_location = pm_config.get('appsettings', 'location')
+    except BaseException as e:
+        pyden_location = config.get('appsettings', 'location')
+
     if 'name' not in args:
         log.error("No name param for the new environment was provided.")
         return [3, "No name param for the new environment was provided.", "", "", ""]
