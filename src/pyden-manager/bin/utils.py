@@ -52,6 +52,7 @@ def getConf() :
 	if os.path.isfile( _dir+os.sep+"local"+os.sep+"pyden.conf" ) and os.stat( _dir+os.sep+"local"+os.sep+"pyden.conf").st_size>10 :
 		cc.read( _dir+os.sep+"local"+os.sep+"pyden.conf")
 	else: 
+		_dir =os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))+os.sep+"pyden-manager" 
 		# branch used when there is no current install
 		cc.read( _dir+os.sep+"default"+os.sep+"pyden.conf")
 	return cc

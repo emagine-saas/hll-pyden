@@ -13,6 +13,8 @@ import shutil
 from utils import load_pyden_config, write_pyden_config, get_proxies, createWorkingLog, readConfig, getConf
 from get_versions import getVersions
 from distutils.version import LooseVersion
+requests.packages.urllib3.disable_warnings( requests.packages.urllib3.exceptions.InsecureRequestWarning)
+
 
 # return int for crash, or a string for a path
 def download_python(version, build_path, proxies, asCSV, session_key): 
@@ -25,7 +27,7 @@ def download_python(version, build_path, proxies, asCSV, session_key):
             else:
                 base_url=unicode(base_url )
 
-        dpr = requests.get(base_url + "{0}/".format(str(version)), proxies=proxies)
+        dpr = requests.get(base_url + "{0}/".format(str(version)), proxies=proxies, verify=False)
     except Exception as ex:
         if asCSV:
             Intersplunk.generateErrorResults("Exception thrown getting python: ({0}, {1})".format(type(ex), ex))
@@ -44,7 +46,7 @@ def download_python(version, build_path, proxies, asCSV, session_key):
                 if python_link.endswith('tgz'):
                     break
 #  python_link = [link for link in re.findall("href=\"(.*?)\"", dpr.content) if link.endswith('tgz')][0]
-            dpr = requests.get(base_url + "{0}/{1}".format(version, python_link), proxies=proxies)
+            dpr = requests.get(base_url + "{0}/{1}".format(version, python_link), proxies=proxies, verify=False)
         else:
             if asCSV:
                 if sys.version_info[0] >2:

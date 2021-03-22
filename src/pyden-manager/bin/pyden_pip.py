@@ -40,7 +40,7 @@ def pipExec(py_exec, log, sysargs, asCSV):
 def pydenPip(log, asCSV, sysargs, verbose) ->int:
     pm_config, config = load_pyden_config()
 
-    pyden_location = pm_config.get('appsettings', 'location')
+    pyden_location = config.get('appsettings', 'location')
     env = False
     pip_arg_index = 1
     conf_arg_index=-1

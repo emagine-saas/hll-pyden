@@ -35,12 +35,12 @@ class PyPIHTMLParser(HTMLParser):
 def get_simple_index( proxies) ->list :
     parser = PyPIHTMLParser()
 
-    r = requests.get("https://pypi.org/simple/", proxies=proxies)
+    r = requests.get("https://pypi.org/simple/", proxies=proxies, verify=False)
     parser.feed(r.text)
     return [{'package': package} for package in parser.packages]
 
 def get_package_description(package, proxies) ->list:
-    r = requests.get("https://pypi.org/pypi/%s/json" % package, proxies=proxies)
+    r = requests.get("https://pypi.org/pypi/%s/json" % package, proxies=proxies, verify=False)
 
     return [{"description": r.json()['info']['description']}]
 

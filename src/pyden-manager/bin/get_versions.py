@@ -17,7 +17,7 @@ def getVersions(log, asCSV, verbose):
     else:
         download_url = readConfig('download', 'url')
         
-    r = requests.get(download_url, proxies=proxies)
+    r = requests.get(download_url, proxies=proxies, verify=False)
     version_pattern = r"""<a href\=\"\d(?:\.\d{1,2}){1,2}\/\"\>(?P<version>\d(?:\.\d{1,2}){1,2})"""
     all_versions = re.findall(version_pattern, r.text)
     verbose and log.debug(all_versions)
@@ -30,7 +30,7 @@ def getVersions(log, asCSV, verbose):
     for version in compatible_versions:
         url = download_url.rstrip() +'/'+ str( version)+"/"
         verbose and log.debug(url)
-        r = requests.get(url, headers={'Cache-Control': 'no-cache'}, proxies=proxies)
+        r = requests.get(url, headers={'Cache-Control': 'no-cache'}, proxies=proxies, verify=False)
         source_pattern = r"""<a href=\"(?P<link>.*)\">Python-{}.tgz""".format( version.replace('.', '\\.'))
         verbose and log.debug(source_pattern)
         verbose and log.debug(r.text)
