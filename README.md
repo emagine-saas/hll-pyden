@@ -27,6 +27,7 @@ My fork of pyden suite does work with splunk 8.0.1, 8.0.2 and 8.0.3, signed "me"
 * Edit code, so the modules can be imported as ''modules''; remove random things from global scope
 * Make logging work, correctly; compliant to python standards.  These are not likely to be scripts that runs often (guess once per server); so tight integration with Splunk events isn't interesting
 * Improve file naming scheme
+* Tested "proxy" option;      NB the proposed proxy-forward headers are not a solution here 
 * Removed some fork/exec calls, as unnecessary and overly-complicated (may be needed in py2 though)
 * ... tests as above 
 * Would like to make more readable by converting to objects OR FP, but not worth time (see expected use volume) 
