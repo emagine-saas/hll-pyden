@@ -148,7 +148,11 @@ def readConfig(section, item):
 
     return ret
 
-def createWorkingLog():
+# apparently in python you can edit default values
+# https://stackoverflow.com/questions/279561/what-is-the-python-equivalent-of-static-variables-inside-a-function
+def createWorkingLog(item=[None]):
+    if item[0]:
+        return item[0] 
     LOGFILE = os.sep.join([ os.environ['SPLUNK_HOME'], 'var', 'log', 'splunk', 'hll-setup.log'])
 # https://stackoverflow.com/questions/533048/how-to-log-source-file-name-and-line-number-in-python
 # had to add the process id item, due to all the fork/ exec in pyden
@@ -159,5 +163,7 @@ def createWorkingLog():
     formatter = logging.Formatter(FORMAT )
     ch.setFormatter(formatter)
     l.addHandler(ch)
+    item[0]=l
     return l
    
+
