@@ -15,17 +15,23 @@ My fork of pyden suite does work with splunk 8.0.1, 8.0.2 and 8.0.3, signed "me"
 * NB: Tests must be run sequentialy; as they each alter the filesystem
 * As I can't see alot of develoment happening on this; I haven't added any type of wrapper to run all of them in one go
 * NB2: build140 includes server reset (aside from the config); so tests can be run multiple times
+* NB3: The unit tests leak warnings about deprecated module "imp". I do not have write access to splunk inc source code, I cannot fix this.  This is upstream of this project.
 
 ## tech errata, the python3 branch is:
 * The original usage syntax (as below) is preserved, as its not valuable to change it.
-* Adding support for python3.   Mostly still support for py2; but some comnmands will fail.
+* **It is important to note that the Pyden workflow is not compatible with persistent splunk processes;** the implicit fork breaks communication with the main splunk process
+* Adding support for python3. Mostly still support for py2; but some comnmands will fail.
 * Write necessary API changes for newer python, in addition to previous.
+* Make stable to run via the unit-tests, on the CLI, and via splunk (the extra access paths make the code easier to use)
 * Remove the "can store any config setting in any file" thing that splunk likes.
-* Edit code, so the modules can be imported as //modules//; remove random things from global scope
-* Make logging work, correctly; compliant to python standards.  These are not likely to be scripts that runs often (guess once per server); so tight integration with Splunk events isn't interesting
+* Edit code, so the modules can be imported as ''modules''; remove random things from global scope
+* Make logging work, correctly; compliant to python standards. These are not likely to be scripts that runs often (guess once per server); so tight integration with Splunk events isn't interesting
+* Improve file naming scheme
+* Tested "proxy" option; NB the proposed proxy-forward headers are not a solution here
+* Removed some fork/exec calls, as unnecessary and overly-complicated (may be needed in py2 though)
 * ... tests as above
-
-
+* Would like to make more readable by converting to objects OR FP, but not worth time (see expected use volume)
+* Note: if a script is run, but seems to hang, the inherited code is trying to pull security details from splunk REST API, and its blocked. Add --no-block to just read from local filesystem (unit tests always set this).
 
 
 
