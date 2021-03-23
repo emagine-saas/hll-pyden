@@ -1,0 +1,41 @@
+hll-pyden:
+This project is making copy of original app suite https://splunkbase.splunk.com/app/4323 .
+Our copy added support for python3, so we support splunk8.
+
+Why use this version?: 
+For our products, we will promptly support as needed (normally inside 24h allowing for working hours). 
+Our version has more testing as part of a larger product.  Our version is tested on several operating systems.  Our version now also has operationally tested proxy support.
+Technically our version runs faster; but that is not likely to have any impact for you.
+
+Original text:
+PyDen has a companion app called PyDen Manager. Admins will need both apps in order for the two to work. PyDen Manager can be found at https://splunkbase.splunk.com/app/4323.
+
+The goal of this application is to provide full Python functionality to Splunk. Currently, the Python distribution built in to Splunk runs on a version 2.7.x depending on the Splunk version. Additionally, there are significant core modules that are excluded in this distribution. This suite of apps will allow developers to create Python virtual environments and pick the Python version and modules installed to the environment. This includes core distributions of the interpreter in multiple 2.7.x and 3.5+ versions, as well as the use of pip for the installation of additional modules within a virtual environment.
+
+Complete documentation for this project can be found at https://github.com/badarsebard/pyden-suite
+
+====================================================
+  Test plan for "with proxy"
+
+changes: minor, I just disabled the warnings mostly
+
+requirements: pls use build pm-134.tgz, which includes the above
+
+Test plan steps:
+* [null test]
+* start with fresh splunk install
+* install 3 apps as listed in manual
+* create an estate
+* look at data, assuming DB is already populating 
+* [important test]
+* start with fresh splunk install
+* install two pyden apps
+* setup a proxy using your favourite from FSJs screenshot AKA www.freeproxylists.net
+* install tse app 
+* click "initialise", wait as needed
+* IMPORTANT: get no errors
+* create an estate
+* look at data, assuming DB is already populating 
+
+
+

@@ -73,7 +73,12 @@ def get_proxies(session_key):
     util_logger = createWorkingLog()
     if(type(session_key) == type(None)):
         if sys.stdin.closed:
-            return {}
+            ret={}
+            conf=getConf()
+            ret['http']=conf.get('appsettings', 'proxy')
+            ret['https']=conf.get('appsettings', 'proxy')
+            ret['ftp']=conf.get('appsettings', 'proxy')
+            return ret
         settings=dict()
         Intersplunk.readResults(settings=settings)
         session_key = settings['sessionKey']
@@ -95,13 +100,18 @@ def get_proxies(session_key):
 
     auth = "%s:%s@" % (user, password) if user else ""
     proxy={}
-    try:
-        tt1, tt2=load_pyden_config()
-        if len(tt1) > 0 :
+    tt1, tt2=load_pyden_config()
+    if len(tt1) > 0 :
+        try:
             proxy=tt1.get('appsettings', 'proxy')
-    except NoSectionError as e:
-        pass
-
+        except NoSectionError as e:
+            pass
+    if len(tt2) > 0 :
+        try:
+            proxy=tt2.get('appsettings', 'proxy')
+        except NoSectionError as e:
+            pass
+ 
     proxies = {
         "http": "http://%s%s/" % (auth, proxy),
         "https": "https://%s%s/" % (auth, proxy),
