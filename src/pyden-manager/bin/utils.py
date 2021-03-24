@@ -74,12 +74,16 @@ def get_proxies(session_key):
     if(type(session_key) == type(None)):
         if sys.stdin.closed:
             ret={}
-            conf=getConf()
+            _dir =os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))+os.sep+"pyden" 
+            conf=ConfigParser()
+            if os.path.isfile( _dir+os.sep+"local"+os.sep+"pyden.conf" ) and os.stat( _dir+os.sep+"local"+os.sep+"pyden.conf").st_size>10 :
+                conf.read( _dir+os.sep+"local"+os.sep+"pyden.conf")
+
             ret['http']=conf.get('appsettings', 'proxy')
             ret['https']=conf.get('appsettings', 'proxy')
             ret['ftp']=conf.get('appsettings', 'proxy')
             return ret
-        settings=dict()
+        setting.s=dict()
         Intersplunk.readResults(settings=settings)
         session_key = settings['sessionKey']
 
@@ -106,7 +110,7 @@ def get_proxies(session_key):
             proxy=tt1.get('appsettings', 'proxy')
         except NoSectionError as e:
             pass
-    if len(tt2) > 0 :
+    if len(tt2) > 0 and not proxy :
         try:
             proxy=tt2.get('appsettings', 'proxy')
         except NoSectionError as e:
@@ -114,7 +118,7 @@ def get_proxies(session_key):
  
     proxies = {
         "http": "http://%s%s/" % (auth, proxy),
-        "https": "https://%s%s/" % (auth, proxy),
+        "https": "http://%s%s/" % (auth, proxy),
         "session_key":session_key
     } if proxy else {}
     return proxies
