@@ -68,13 +68,16 @@ def write_pyden_config(pyden_location, config, stanza, attribute, value):
     with open(local_conf, 'w') as f:
         config.write(f)
 
+STATIC_SELF = sys.modules[__name__]
 
 def get_proxies(session_key):
+    if 'proxies' in STATIC_SELF:
+        return STATIC_SELF.proxies
     util_logger = createWorkingLog()
     if(type(session_key) == type(None)):
         if sys.stdin.closed:
             ret={}
-            _dir =os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))+os.sep+"pyden" 
+            _dir =os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))+os.sep+"pyden-manager" 
             conf=ConfigParser()
             if os.path.isfile( _dir+os.sep+"local"+os.sep+"pyden.conf" ) and os.stat( _dir+os.sep+"local"+os.sep+"pyden.conf").st_size>10 :
                 conf.read( _dir+os.sep+"local"+os.sep+"pyden.conf")
@@ -83,7 +86,7 @@ def get_proxies(session_key):
             ret['https']=conf.get('appsettings', 'proxy')
             ret['ftp']=conf.get('appsettings', 'proxy')
             return ret
-        setting.s=dict()
+        settings=dict()
         Intersplunk.readResults(settings=settings)
         session_key = settings['sessionKey']
 
@@ -115,12 +118,22 @@ def get_proxies(session_key):
             proxy=tt2.get('appsettings', 'proxy')
         except NoSectionError as e:
             pass
+    if not proxy :
+        try:
+            tt3=ConfigParser()
+            _dir =os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))+os.sep+"pyden-manager" 
+        # branch used when there is no current install
+            tt3.read( _dir+os.sep+"local"+os.sep+"pyden.conf")
+            proxy=tt3.get('appsettings', 'proxy')
+        except NoSectionError as e:
+            pass
  
     proxies = {
         "http": "http://%s%s/" % (auth, proxy),
         "https": "http://%s%s/" % (auth, proxy),
         "session_key":session_key
     } if proxy else {}
+    STATIC_SELF.proxies=proxies
     return proxies
 
 def pyden_env(confFile, py_exec, pyden):

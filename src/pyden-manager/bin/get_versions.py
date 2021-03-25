@@ -8,9 +8,8 @@ from utils import get_proxies, createWorkingLog, readConfig
 
 def getVersions(log, asCSV, verbose):
     settings = dict()
-    proxies=()
+    proxies = get_proxies(None)
     if asCSV:
-        proxies = get_proxies(None)
         download_url = simpleRequest("/servicesNS/nobody/pyden-manager/properties/pyden/download/url",
                                  sessionKey=proxies['session_key'])[1]
         download_url =str(download_url, 'utf-8' )
