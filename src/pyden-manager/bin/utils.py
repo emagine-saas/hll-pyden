@@ -68,11 +68,8 @@ def write_pyden_config(pyden_location, config, stanza, attribute, value):
     with open(local_conf, 'w') as f:
         config.write(f)
 
-STATIC_SELF = sys.modules[__name__]
-
+# https://stackoverflow.com/questions/1977362/how-to-create-module-wide-variables-in-python#1978076
 def get_proxies(session_key):
-    if 'proxies' in STATIC_SELF:
-        return STATIC_SELF.proxies
     util_logger = createWorkingLog()
     if(type(session_key) == type(None)):
         if sys.stdin.closed:
@@ -133,7 +130,6 @@ def get_proxies(session_key):
         "https": "http://%s%s/" % (auth, proxy),
         "session_key":session_key
     } if proxy else {}
-    STATIC_SELF.proxies=proxies
     return proxies
 
 def pyden_env(confFile, py_exec, pyden):

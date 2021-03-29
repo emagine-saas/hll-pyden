@@ -6,9 +6,10 @@ import re
 import sys
 from utils import get_proxies, createWorkingLog, readConfig
 
-def getVersions(log, asCSV, verbose):
+def getVersions(log, asCSV, verbose, proxies=None):
     settings = dict()
-    proxies = get_proxies(None)
+    if not proxies:	
+        proxies = get_proxies(None)
     if asCSV:
         download_url = simpleRequest("/servicesNS/nobody/pyden-manager/properties/pyden/download/url",
                                  sessionKey=proxies['session_key'])[1]
@@ -49,10 +50,10 @@ def getVersions(log, asCSV, verbose):
 if __name__ == "__main__":
     logger = createWorkingLog()
     if '--no-block' in sys.argv:
-        tt=getVersions(logger, False, False)
+        tt=getVersions(logger, False, False, None)
         print("Version")
         for i in tt:
             print(i['version'])
     else:
-        getVersions(logger, True, False)
+        getVersions(logger, True, False, None)
 

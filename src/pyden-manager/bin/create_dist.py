@@ -233,20 +233,6 @@ def createDist(log, sysargs, asCSV ):
     download_arg = True
     settings = dict()
 
-#    latest_python_search = r"""
-#    | getversions 
-#    | rex field=version "(?<v_M>\d+)\.(?<v_m>\d+)\.(?<v_mm>\d+)" 
-#    | eval v_M=tonumber(v_M), v_m=tonumber(v_m), v_mm=tonumber(v_mm) 
-#    | sort -v_M, -v_m, -v_mm 
-#    | table version 
-#    | head 1
-#    """
-    dist_version= getVersions(log, False, False )
-    dist_version=map(lambda a: a['version'], dist_version)
-# sorted(self.version_set, key=lambda v:LooseVersion(v.version_number))
-    dist_version=sorted( dist_version, key=lambda a:LooseVersion(a) )
-    dist_version=dist_version[0]
-
     if int(sys.version_info[0]) == 2 :
         log.warn("In current edition may not use python2 " )
         Intersplunk.generateErrorResults("In current edition may not use Python2")
@@ -262,6 +248,12 @@ def createDist(log, sysargs, asCSV ):
         session_key = settings['sessionKey']
     proxies = get_proxies(session_key)
 
+    dist_version= getVersions(log, False, False, proxies )
+    dist_version=map(lambda a: a['version'], dist_version)
+# sorted(self.version_set, key=lambda v:LooseVersion(v.version_number))
+    dist_version=sorted( dist_version, key=lambda a:LooseVersion(a) )
+    dist_version=dist_version[0]
+
     for arg in sysargs:
         if "version" in arg:
             dist_version = str(arg.split("=")[1])
@@ -269,7 +261,6 @@ def createDist(log, sysargs, asCSV ):
             download_arg = str(arg.split("=")[1])
     log.info("Creating Python distribution version " +str( dist_version))
     return build_dist(dist_version, download_arg, log, proxies, asCSV, session_key) 
-
 
 
 
