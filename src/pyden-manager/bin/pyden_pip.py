@@ -66,10 +66,16 @@ def pydenPip(log, asCSV, sysargs, verbose) ->int:
 #    sys.stdout.write("messages\n")
 #    sys.stdout.flush()
     try:
+        proxies = get_proxies(None)
+        cnmd=None
+        if proxies:
+            cmd=[py_exec, '-m', 'pip', '--proxy', proxies['https'] ] + sysargs[pip_arg_index:conf_arg_index ]
+        else:
+            cmd=[py_exec, '-m', 'pip' ] + sysargs[pip_arg_index:conf_arg_index ]
         if conf_arg_index < 0:
             conf_arg_index=len(sysargs)
-        verbose and log.debug("pyden pip started "+str([py_exec, '-m', 'pip'] + sysargs[pip_arg_index:conf_arg_index ] ) )
-        out = subprocess.check_output([py_exec, '-m', 'pip'] + sysargs[pip_arg_index:conf_arg_index ], stderr=subprocess.STDOUT, timeout=10 )
+        verbose and log.debug("pyden pip started "+str(cmd ) )
+        out = subprocess.check_output(cmd, stderr=subprocess.STDOUT, timeout=10 )
         verbose and log.debug("pyden pip completed ")
         log.error("PIP output "+ out.decode())
         if asCSV:
