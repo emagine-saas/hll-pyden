@@ -5,11 +5,11 @@ import logging
 # Log verboseness names are fairly obvious 
 DESIRED_LOG_LEVEL=logging.DEBUG
 if sys.version < '3':
-    from ConfigParser import ConfigParser,NoOptionError, NoSectionError
+    from ConfigParser import ConfigParser, NoOptionError, NoSectionError
     from StringIO import StringIO
     sys.path.append( os.environ['SPLUNK_HOME']+os.sep+ 'lib' +os.sep+'python2.7'+os.sep+'site-packages' + os.sep+'splunk'+os.sep)
 else:
-    from configparser import ConfigParser,NoOptionError, NoSectionError
+    from configparser import ConfigParser, NoOptionError, NoSectionError
     from io import StringIO
     sys.path.append( os.environ['SPLUNK_HOME']+os.sep+ 'lib' +os.sep+'python3.7'+os.sep+'site-packages' + os.sep+'splunk'+os.sep)
 import Intersplunk
@@ -79,10 +79,19 @@ def get_proxies(session_key):
             if os.path.isfile( _dir+os.sep+"local"+os.sep+"pyden.conf" ) and os.stat( _dir+os.sep+"local"+os.sep+"pyden.conf").st_size>10 :
                 conf.read( _dir+os.sep+"local"+os.sep+"pyden.conf")
 
-            ret['http']=conf.get('appsettings', 'proxy')
-            ret['https']=conf.get('appsettings', 'proxy')
-            ret['ftp']=conf.get('appsettings', 'proxy')
+			val=None
+			try:
+				val=conf.get('appsettings', 'proxy')
+			except NoOptionError as e:
+				pass
+			except NoSectionError as e:
+				pass
+
+            ret['http']=val
+            ret['https']=val
+            ret['ftp']=val
             return ret
+
         settings=dict()
         Intersplunk.readResults(settings=settings)
         session_key = settings['sessionKey']
@@ -110,10 +119,14 @@ def get_proxies(session_key):
             proxy=tt1.get('appsettings', 'proxy')
         except NoSectionError as e:
             pass
+        except NoOptionError as e:
+            pass
     if len(tt2) > 0 and not proxy :
         try:
             proxy=tt2.get('appsettings', 'proxy')
         except NoSectionError as e:
+            pass
+        except NoOptionError as e:
             pass
     if not proxy :
         try:
@@ -123,6 +136,8 @@ def get_proxies(session_key):
             tt3.read( _dir+os.sep+"local"+os.sep+"pyden.conf")
             proxy=tt3.get('appsettings', 'proxy')
         except NoSectionError as e:
+            pass
+        except NoOptionError as e:
             pass
  
     proxies = {

@@ -79,7 +79,7 @@ def pydenPip(log, asCSV, sysargs, verbose) ->int:
         verbose and log.debug("pyden pip completed ")
         log.error("PIP output "+ out.decode())
         if asCSV:
-            Intersplunk.generateErrorResults("[the real pip]: library "+str(sysargs[pip_arg_index:conf_arg_index ])+ " is installed " )
+            Intersplunk.outputResults([ "[the real pip]: library "+str(sysargs[pip_arg_index:conf_arg_index ])+ " is installed " ])
         return 0
 #
 
